@@ -1,0 +1,398 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taj Jewellery</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: #0f1016;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 15px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: transparent;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    header * {
+      pointer-events: auto;
+    }
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #d4af37;
+      text-transform: uppercase;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      text-decoration: none;
+    }
+    .social-links {
+      display: flex;
+      gap: 15px;
+    }
+    .social-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      transition: transform 0.3s ease;
+      animation: pulse 2s infinite;
+    }
+    .fb-icon {
+      background: #1877f2;
+    }
+    .wa-icon {
+      background: #25d366;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    .hero-container {
+      padding-top: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 60px;
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    .product-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 20px;
+      overflow: hidden;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .product-img-box {
+      width: 100%;
+      height: 380px;
+      background: #1a1a24;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .product-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-info {
+      padding: 24px;
+      text-align: center;
+    }
+    .product-title {
+      font-size: 24px;
+      color: #f7e7ce;
+      margin-bottom: 8px;
+    }
+    .product-desc {
+      font-size: 14px;
+      color: #b0b0b0;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .product-price {
+      font-size: 26px;
+      color: #d4af37;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .order-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #d4af37, #aa820a);
+      color: #000;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+      transition: all 0.3s ease;
+    }
+    .order-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      z-index: 2000;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-box {
+      background: #161822;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      width: 100%;
+      max-width: 440px;
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .form-group {
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #ccc;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #333647;
+      background: #0d0e14;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: #d4af37;
+    }
+    .cod-badge {
+      display: inline-block;
+      background: rgba(212, 175, 55, 0.15);
+      color: #d4af37;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 300px;
+      font-size: 20px;
+      color: #d4af37;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="#" class="logo">TAJ JEWELLERY</a>
+    <div class="social-links">
+      <a href="https://facebook.com" target="_blank" class="social-icon fb-icon"><i class="fab fa-facebook-f"></i></a>
+      <a href="https://wa.me/8801700000000" target="_blank" class="social-icon wa-icon"><i class="fab fa-whatsapp"></i></a>
+    </div>
+  </header>
+
+  <div class="hero-container">
+    <div id="loading" class="loading-spinner">
+      <i class="fas fa-circle-notch fa-spin"></i>
+    </div>
+
+    <div class="product-card" id="productCard" style="display: none;">
+      <div class="product-img-box">
+        <img id="productImage" src="" alt="Product" />
+      </div>
+      <div class="product-info">
+        <h1 class="product-title" id="productTitle"></h1>
+        <p class="product-desc" id="productDesc"></p>
+        <div class="product-price" id="productPrice"></div>
+        <button class="order-btn" id="openOrderModal">ORDER NOW</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-box">
+      <button class="close-btn" id="closeOrderModal">&times;</button>
+      <div class="cod-badge">Cash on Delivery</div>
+      <form id="orderForm">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="custName" required />
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" id="custPhone" required />
+        </div>
+        <div class="form-group">
+          <label>Full Delivery Address</label>
+          <textarea id="custAddress" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" id="custQty" value="1" min="1" required />
+        </div>
+        <button type="submit" class="order-btn" id="submitOrderBtn">CONFIRM ORDER</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+    import { getDatabase, ref, get, child, push, set } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_AW-LmIBJVttdZ6XPsDc9MBONHdEJEsE",
+      authDomain: "taj-jewellery-89fc3.firebaseapp.com",
+      databaseURL: "https://taj-jewellery-89fc3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "taj-jewellery-89fc3",
+      storageBucket: "taj-jewellery-89fc3.firebasestorage.app",
+      messagingSenderId: "28259630164",
+      appId: "1:28259630164:web:acd7c35b5513c32d9f01c1",
+      measurementId: "G-0QDYK7Y9PK"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let activeProduct = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    const autoName = urlParams.get("name") || urlParams.get("fb_name") || "";
+    const autoPhone = urlParams.get("phone") || urlParams.get("mobile") || "";
+    const autoAddress = urlParams.get("address") || "";
+
+    if (autoName) document.getElementById("custName").value = autoName;
+    if (autoPhone) document.getElementById("custPhone").value = autoPhone;
+    if (autoAddress) document.getElementById("custAddress").value = autoAddress;
+
+    async function fetchProduct() {
+      const dbRef = ref(db);
+      try {
+        if (productId) {
+          const snapshot = await get(child(dbRef, `products/${productId}`));
+          if (snapshot.exists()) {
+            activeProduct = { id: productId, ...snapshot.val() };
+            renderProduct(activeProduct);
+            return;
+          }
+        }
+        const snapshot = await get(child(dbRef, "products"));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const firstKey = Object.keys(data)[0];
+          activeProduct = { id: firstKey, ...data[firstKey] };
+          renderProduct(activeProduct);
+        } else {
+          document.getElementById("loading").innerHTML = "No Product Found";
+        }
+      } catch (err) {
+        document.getElementById("loading").innerHTML = "Error loading product";
+      }
+    }
+
+    function renderProduct(p) {
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("productCard").style.display = "block";
+      document.getElementById("productImage").src = p.imageUrl || "";
+      document.getElementById("productTitle").textContent = p.name || "";
+      document.getElementById("productDesc").textContent = p.description || "";
+      document.getElementById("productPrice").textContent = `৳ ${p.price || 0}`;
+    }
+
+    fetchProduct();
+
+    const orderModal = document.getElementById("orderModal");
+    const openOrderModal = document.getElementById("openOrderModal");
+    const closeOrderModal = document.getElementById("closeOrderModal");
+
+    openOrderModal.addEventListener("click", () => {
+      orderModal.classList.add("active");
+    });
+
+    closeOrderModal.addEventListener("click", () => {
+      orderModal.classList.remove("active");
+    });
+
+    document.getElementById("orderForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("submitOrderBtn");
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+
+      const orderData = {
+        productId: activeProduct?.id || "",
+        productName: activeProduct?.name || "",
+        unitPrice: activeProduct?.price || 0,
+        customerName: document.getElementById("custName").value.trim(),
+        customerPhone: document.getElementById("custPhone").value.trim(),
+        customerAddress: document.getElementById("custAddress").value.trim(),
+        quantity: parseInt(document.getElementById("custQty").value) || 1,
+        totalAmount: (activeProduct?.price || 0) * (parseInt(document.getElementById("custQty").value) || 1),
+        paymentType: "Cash on Delivery",
+        status: "Pending",
+        timestamp: Date.now()
+      };
+
+      try {
+        const ordersRef = ref(db, "orders");
+        const newOrderRef = push(ordersRef);
+        await set(newOrderRef, orderData);
+
+        orderModal.innerHTML = `
+          <div class="modal-box" style="text-align: center;">
+            <i class="fas fa-check-circle" style="font-size: 50px; color: #25d366; margin-bottom: 15px;"></i>
+            <h2>Order Placed Successfully!</h2>
+            <p style="margin: 10px 0 20px; color: #ccc;">We will call you shortly to confirm your order.</p>
+            <button class="order-btn" onclick="window.location.reload()">OK</button>
+          </div>
+        `;
+      } catch (err) {
+        alert("Error: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "CONFIRM ORDER";
+      }
+    });
+  </script>
+</body>
+</html>
