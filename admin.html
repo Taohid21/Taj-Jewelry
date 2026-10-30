@@ -1,0 +1,383 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taj Jewellery - Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background: #0c0d14;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    .auth-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .auth-card {
+      background: #171923;
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+      border: 1px solid #2d3748;
+    }
+    .btn-google {
+      background: #fff;
+      color: #1a202c;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .admin-container {
+      display: none;
+      padding: 30px 5%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #2d3748;
+      padding-bottom: 15px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: #171923;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #2d3748;
+    }
+    .card h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      color: #d4af37;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px;
+      background: #0f1016;
+      border: 1px solid #2d3748;
+      border-radius: 6px;
+      color: #fff;
+      outline: none;
+    }
+    .btn {
+      background: #d4af37;
+      color: #000;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-logout {
+      background: #e53e3e;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .list-item {
+      background: #0f1016;
+      border: 1px solid #2d3748;
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .status-pending { background: #d69e2e; color: #000; }
+    .status-confirmed { background: #38a169; color: #fff; }
+    .status-cancelled { background: #e53e3e; color: #fff; }
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #2d3748;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #10121a;
+      color: #d4af37;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-wrapper" id="authWrapper">
+    <div class="auth-card">
+      <h2 style="color: #d4af37; margin-bottom: 10px;">Admin Access</h2>
+      <p style="color: #a0aec0; font-size: 14px;">Taj Jewellery Management</p>
+      <button class="btn-google" id="googleLoginBtn">
+        <i class="fab fa-google"></i> Sign In with Google
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-container" id="adminContainer">
+    <div class="nav-bar">
+      <h2>Taj Dashboard</h2>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <span id="userEmailBadge" style="font-size: 13px; color: #a0aec0;"></span>
+        <button class="btn-logout" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Add New Product</h2>
+        <form id="addProductForm">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="pName" required />
+          </div>
+          <div class="form-group">
+            <label>Price (BDT)</label>
+            <input type="number" id="pPrice" required />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="pDesc" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Product Image</label>
+            <input type="file" id="pImageFile" accept="image/*" required />
+          </div>
+          <button type="submit" class="btn" id="saveProductBtn">Save Product</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Products & Share Links</h2>
+        <div id="productsList"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 30px;">
+      <h2>Incoming Orders</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+    import { getDatabase, ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_AW-LmIBJVttdZ6XPsDc9MBONHdEJEsE",
+      authDomain: "taj-jewellery-89fc3.firebaseapp.com",
+      databaseURL: "https://taj-jewellery-89fc3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "taj-jewellery-89fc3",
+      storageBucket: "taj-jewellery-89fc3.firebasestorage.app",
+      messagingSenderId: "28259630164",
+      appId: "1:28259630164:web:acd7c35b5513c32d9f01c1",
+      measurementId: "G-0QDYK7Y9PK"
+    };
+
+    const CLOUDINARY_CLOUD_NAME = "dxr4ym0em";
+    const CLOUDINARY_PRESET = "ml_default";
+    const DOMAIN = window.location.origin + window.location.pathname.replace("admin.html", "");
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("authWrapper").style.display = "none";
+        document.getElementById("adminContainer").style.display = "block";
+        document.getElementById("userEmailBadge").textContent = user.email;
+        loadAdminData();
+      } else {
+        document.getElementById("authWrapper").style.display = "flex";
+        document.getElementById("adminContainer").style.display = "none";
+      }
+    });
+
+    async function uploadImageToCloudinary(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      return data.secure_url;
+    }
+
+    document.getElementById("addProductForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("saveProductBtn");
+      btn.disabled = true;
+      btn.textContent = "Uploading image...";
+
+      try {
+        const file = document.getElementById("pImageFile").files[0];
+        const imageUrl = await uploadImageToCloudinary(file);
+
+        btn.textContent = "Saving to Database...";
+        const productsRef = ref(db, "products");
+        const newProductRef = push(productsRef);
+
+        await set(newProductRef, {
+          name: document.getElementById("pName").value.trim(),
+          price: parseFloat(document.getElementById("pPrice").value),
+          description: document.getElementById("pDesc").value.trim(),
+          imageUrl: imageUrl,
+          createdAt: Date.now()
+        });
+
+        document.getElementById("addProductForm").reset();
+        alert("Product added successfully!");
+      } catch (err) {
+        alert("Upload error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Save Product";
+      }
+    });
+
+    function loadAdminData() {
+      onValue(ref(db, "products"), (snapshot) => {
+        const listDiv = document.getElementById("productsList");
+        listDiv.innerHTML = "";
+        const data = snapshot.val();
+        if (!data) return;
+
+        Object.keys(data).forEach((id) => {
+          const item = data[id];
+          const productLink = `${DOMAIN}/?id=${id}`;
+          const div = document.createElement("div");
+          div.className = "list-item";
+          div.innerHTML = `
+            <div>
+              <strong>${item.name}</strong> - ৳${item.price}
+              <br/>
+              <input type="text" readonly value="${productLink}" style="font-size:11px; padding:4px; margin-top:4px; width:220px; background:#000; color:#d4af37; border:none;" />
+            </div>
+            <button class="btn" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="navigator.clipboard.writeText('${productLink}'); alert('Link copied!');">Copy Link</button>
+          `;
+          listDiv.appendChild(div);
+        });
+      });
+
+      onValue(ref(db, "orders"), (snapshot) => {
+        const tbody = document.getElementById("ordersTableBody");
+        tbody.innerHTML = "";
+        const data = snapshot.val();
+        if (!data) return;
+
+        Object.keys(data).reverse().forEach((id) => {
+          const ord = data[id];
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${new Date(ord.timestamp).toLocaleDateString()}</td>
+            <td>${ord.customerName}</td>
+            <td><a href="tel:${ord.customerPhone}" style="color:#d4af37;">${ord.customerPhone}</a></td>
+            <td>${ord.customerAddress}</td>
+            <td>${ord.productName}</td>
+            <td>${ord.quantity}</td>
+            <td>৳${ord.totalAmount}</td>
+            <td><span class="status-badge status-${(ord.status || 'pending').toLowerCase()}">${ord.status || 'Pending'}</span></td>
+            <td>
+              <select onchange="window.updateOrderStatus('${id}', this.value)" style="background:#0f1016; color:#fff; border:1px solid #333; padding:4px;">
+                <option value="Pending" ${ord.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Confirmed" ${ord.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                <option value="Cancelled" ${ord.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+              </select>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    window.updateOrderStatus = (id, newStatus) => {
+      update(ref(db, `orders/${id}`), { status: newStatus });
+    };
+  </script>
+</body>
+</html>
