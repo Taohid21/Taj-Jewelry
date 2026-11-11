@@ -237,7 +237,7 @@
       <form id="orderForm">
         <div class="form-group">
           <label>আপনার নাম (Full Name):</label>
-          <input type="text" id="custName" placeholder="উদা: মোঃ রাশেদুল ইসলাম" required />
+          <input type="text" id="custName" placeholder="উদা: মোঃ তাওহিদ" required />
         </div>
         <div class="form-group">
           <label>মোবাইল নম্বর (Active Mobile):</label>
@@ -315,61 +315,46 @@
     document.getElementById("openOrderModal").addEventListener("click", () => orderModal.classList.add("active"));
     document.getElementById("closeOrderModal").addEventListener("click", () => orderModal.classList.remove("active"));
 
-    // SMART AUTO ZONE DETECTION
-    function detectZone(address) {
-      const a = String(address || "").toLowerCase();
-      if (a.includes("mohammadpur") || a.includes("mirpur") || a.includes("dhanmondi") || a.includes("uttara") || a.includes("gulshan")) return "Inside Dhaka > Dhaka Metro";
-      if (a.includes("gazipur") || a.includes("narayanganj") || a.includes("savar")) return "Sub-Dhaka > Outer Metro";
-      return "Outside Dhaka > General Zone";
-    }
-
-    // FORM SUBMIT WITH REAL-TIME BLOCK CHECK
+    // FORM SUBMIT — DIRECT PUSH (MATCHES YOUR RULES EXACTLY)
     document.getElementById("orderForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("submitOrderBtn");
       btn.disabled = true;
-      btn.textContent = "যাচাই করা হচ্ছে...";
+      btn.textContent = "অর্ডার প্রসেসিং হচ্ছে...";
 
-      const rawPhone = document.getElementById("custPhone").value.trim();
-      const cleanPhone = rawPhone.replace(/[^0-9]/g, '').slice(-11);
+      const rawPhone = document.getElementById("custPhone").value.trim().replace(/[^0-9]/g, '');
+      
+      // আপনার রুলসের ভ্যালিডেশন: ফোন নম্বর অবশ্যই ১০ থেকে ১৫ অক্ষরের হতে হবে
+      if (rawPhone.length < 10 || rawPhone.length > 15) {
+        alert("দয়া করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!");
+        btn.disabled = false;
+        btn.textContent = "অর্ডার কনফার্ম করুন";
+        return;
+      }
+
+      const qty = parseInt(document.getElementById("custQty").value) || 1;
+      const unitPrice = Number(activeProduct?.price || 218);
+      const total = unitPrice * qty;
+      const address = document.getElementById("custAddress").value.trim();
+      const name = document.getElementById("custName").value.trim();
+
+      // আপনার রুলসে থাকা বাধ্যতামূলক ৪টি ফিল্ড সহ অবজেক্ট
+      const orderData = {
+        customerName: name,
+        customerPhone: rawPhone,
+        customerAddress: address,
+        totalAmount: total,
+        dueAmount: total,
+        quantity: qty,
+        unitPrice: unitPrice,
+        productId: activeProduct?.id || "",
+        productName: activeProduct?.name || "Exclusive Jewellery",
+        status: "Processing",
+        paymentType: "Cash on Delivery",
+        createdAt: Date.now()
+      };
 
       try {
-        // ১. ব্লক লিস্ট ভেরিফিকেশন (Block Check)
-        const blockSnap = await get(child(ref(db), `blocked_numbers/${cleanPhone}`));
-        if (blockSnap.exists()) {
-          orderModal.innerHTML = `
-            <div class="modal-box" style="text-align: center;">
-              <i class="fas fa-ban" style="font-size: 50px; color: #ef4444; margin-bottom: 15px;"></i>
-              <h2 style="color: #ef4444;">অর্ডার গ্রহণ করা সম্ভব হচ্ছে না</h2>
-              <p style="margin: 12px 0 20px; color: #cbd5e1; font-size: 14px;">আপনার ফোন নম্বরটি সিস্টেম দ্বারা সাময়িকভাবে সীমাবদ্ধ (Restricted) করা হয়েছে। সহায়তার জন্য পেজে যোগাযোগ করুন।</p>
-              <button class="order-btn" style="background:#334155; color:#fff;" onclick="window.location.reload()">বন্ধ করুন</button>
-            </div>
-          `;
-          return;
-        }
-
-        // ২. রিয়েল অর্ডার ফায়ারবেসে পুশ
-        const qty = parseInt(document.getElementById("custQty").value) || 1;
-        const unitPrice = activeProduct?.price || 218;
-        const total = unitPrice * qty;
-        const address = document.getElementById("custAddress").value.trim();
-
-        const orderData = {
-          productId: activeProduct?.id || "",
-          productName: activeProduct?.name || "Exclusive Jewellery",
-          unitPrice: unitPrice,
-          customerName: document.getElementById("custName").value.trim(),
-          customerPhone: rawPhone,
-          customerAddress: address,
-          quantity: qty,
-          totalAmount: total,
-          dueAmount: total,
-          zone: detectZone(address),
-          paymentType: "Cash on Delivery",
-          status: "Processing",
-          createdAt: Date.now()
-        };
-
         const ordersRef = ref(db, "orders");
         const newRef = push(ordersRef);
         await set(newRef, orderData);
@@ -378,12 +363,12 @@
           <div class="modal-box" style="text-align: center;">
             <i class="fas fa-check-circle" style="font-size: 50px; color: #25d366; margin-bottom: 15px;"></i>
             <h2 style="color: #ffd700;">ধন্যবাদ! অর্ডার সফল হয়েছে</h2>
-            <p style="margin: 12px 0 20px; color: #e2e8f0; font-size: 14.5px;">আমাদের প্রতিনিধি কিছুক্ষণের মধ্যেই আপনার নম্বরে কল দিয়ে অর্ডারটি নিশ্চিত করবেন।</p>
+            <p style="margin: 12px 0 20px; color: #e2e8f0; font-size: 14.5px;">আমাদের প্রতিনিধি কিছুক্ষণের মধ্যেই কল দিয়ে অর্ডার নিশ্চিত করবেন।</p>
             <button class="order-btn" onclick="window.location.reload()">ঠিক আছে</button>
           </div>
         `;
       } catch (err) {
-        alert("ত্রুটি: " + err.message);
+        alert("অর্ডার ত্রুটি: " + err.message);
         btn.disabled = false;
         btn.textContent = "অর্ডার কনফার্ম করুন";
       }
