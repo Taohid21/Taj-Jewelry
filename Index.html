@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taj Jewellery - Official Store</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background: #0b0c10;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 16px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(11, 12, 16, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      z-index: 1000;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      color: #ffd700;
+      text-transform: uppercase;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+      text-decoration: none;
+    }
+    .social-links { display: flex; gap: 14px; }
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .fb-icon { background: #1877f2; }
+    .wa-icon { background: #25d366; }
+
+    .hero-container {
+      padding-top: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 60px;
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    .product-card {
+      background: #161822;
+      border: 1.5px solid #d4af37;
+      border-radius: 20px;
+      overflow: hidden;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 25px rgba(212, 175, 55, 0.15);
+    }
+    .product-img-box {
+      width: 100%;
+      height: 380px;
+      background: #0f1016;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .product-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-info {
+      padding: 26px;
+      text-align: center;
+    }
+    .product-title {
+      font-size: 26px;
+      color: #ffffff;
+      font-weight: 800;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .product-desc {
+      font-size: 14.5px;
+      color: #e2e8f0;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+    .product-price {
+      font-size: 32px;
+      color: #ffd700;
+      font-weight: 900;
+      margin-bottom: 24px;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    .order-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ffd700, #b8860b);
+      color: #0b0c10;
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+      transition: all 0.25s ease;
+    }
+    .order-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.7);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      z-index: 2000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #141622;
+      border: 1.5px solid #d4af37;
+      width: 100%;
+      max-width: 450px;
+      border-radius: 16px;
+      padding: 26px;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    }
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: #cbd5e1;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label {
+      display: block;
+      font-size: 13.5px;
+      color: #f8fafc;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 13px;
+      border-radius: 8px;
+      border: 1.5px solid #334155;
+      background: #0b0c10;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: #ffd700;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    .cod-badge {
+      display: inline-block;
+      background: rgba(255, 215, 0, 0.15);
+      color: #ffd700;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="#" class="logo">TAJ JEWELLERY</a>
+    <div class="social-links">
+      <a href="https://facebook.com" target="_blank" class="social-icon fb-icon"><i class="fab fa-facebook-f"></i></a>
+      <a href="https://wa.me/8801700000000" target="_blank" class="social-icon wa-icon"><i class="fab fa-whatsapp"></i></a>
+    </div>
+  </header>
+
+  <div class="hero-container">
+    <div id="loading" style="color: #ffd700; font-size: 20px; font-weight: bold; margin-top: 50px;">
+      <i class="fas fa-circle-notch fa-spin"></i> Loading Taj Jewellery...
+    </div>
+
+    <div class="product-card" id="productCard" style="display: none;">
+      <div class="product-img-box">
+        <img id="productImage" src="" alt="Taj Jewellery Product" />
+      </div>
+      <div class="product-info">
+        <h1 class="product-title" id="productTitle"></h1>
+        <p class="product-desc" id="productDesc"></p>
+        <div class="product-price" id="productPrice"></div>
+        <button class="order-btn" id="openOrderModal">অর্ডার করুন (CASH ON DELIVERY)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER MODAL -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-box">
+      <button class="close-btn" id="closeOrderModal">&times;</button>
+      <div class="cod-badge"><i class="fas fa-shield-alt"></i> ক্যাশ অন ডেলিভারি (পণ্য পেয়ে টাকা দিন)</div>
+      
+      <form id="orderForm">
+        <div class="form-group">
+          <label>আপনার নাম (Full Name):</label>
+          <input type="text" id="custName" placeholder="উদা: মোঃ রাশেদুল ইসলাম" required />
+        </div>
+        <div class="form-group">
+          <label>মোবাইল নম্বর (Active Mobile):</label>
+          <input type="tel" id="custPhone" placeholder="017xxxxxxxx" required />
+        </div>
+        <div class="form-group">
+          <label>ডেলিভারির সম্পূর্ণ ঠিকানা (জেলা ও থানা সহ):</label>
+          <textarea id="custAddress" rows="3" placeholder="গ্রাম/রোড, থানা, জেলা" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>পরিমাণ (Quantity):</label>
+          <input type="number" id="custQty" value="1" min="1" required />
+        </div>
+        <button type="submit" class="order-btn" id="submitOrderBtn">অর্ডার কনফার্ম করুন</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+    import { getDatabase, ref, get, child, push, set } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_AW-LmIBJVttdZ6XPsDc9MBONHdEJEsE",
+      authDomain: "taj-jewellery-89fc3.firebaseapp.com",
+      databaseURL: "https://taj-jewellery-89fc3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "taj-jewellery-89fc3",
+      storageBucket: "taj-jewellery-89fc3.firebasestorage.app"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let activeProduct = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    async function fetchProduct() {
+      const dbRef = ref(db);
+      try {
+        if (productId) {
+          const snapshot = await get(child(dbRef, `products/${productId}`));
+          if (snapshot.exists()) {
+            activeProduct = { id: productId, ...snapshot.val() };
+            renderProduct(activeProduct);
+            return;
+          }
+        }
+        const snapshot = await get(child(dbRef, "products"));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const firstKey = Object.keys(data)[0];
+          activeProduct = { id: firstKey, ...data[firstKey] };
+          renderProduct(activeProduct);
+        } else {
+          document.getElementById("loading").innerHTML = "No Product Found";
+        }
+      } catch (err) {
+        document.getElementById("loading").innerHTML = "Error loading product";
+      }
+    }
+
+    function renderProduct(p) {
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("productCard").style.display = "block";
+      document.getElementById("productImage").src = p.imageUrl || "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600";
+      document.getElementById("productTitle").textContent = p.name || "Exclusive Jewellery Collection";
+      document.getElementById("productDesc").textContent = p.description || "১০০% প্রিমিয়াম কোয়ালিটি তাজ জুয়েলারি কালেকশন। সারা দেশে হোম ডেলিভারি।";
+      document.getElementById("productPrice").textContent = `৳ ${p.price || 218}`;
+    }
+
+    fetchProduct();
+
+    const orderModal = document.getElementById("orderModal");
+    document.getElementById("openOrderModal").addEventListener("click", () => orderModal.classList.add("active"));
+    document.getElementById("closeOrderModal").addEventListener("click", () => orderModal.classList.remove("active"));
+
+    // SMART AUTO ZONE DETECTION
+    function detectZone(address) {
+      const a = String(address || "").toLowerCase();
+      if (a.includes("mohammadpur") || a.includes("mirpur") || a.includes("dhanmondi") || a.includes("uttara") || a.includes("gulshan")) return "Inside Dhaka > Dhaka Metro";
+      if (a.includes("gazipur") || a.includes("narayanganj") || a.includes("savar")) return "Sub-Dhaka > Outer Metro";
+      return "Outside Dhaka > General Zone";
+    }
+
+    // FORM SUBMIT WITH REAL-TIME BLOCK CHECK
+    document.getElementById("orderForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("submitOrderBtn");
+      btn.disabled = true;
+      btn.textContent = "যাচাই করা হচ্ছে...";
+
+      const rawPhone = document.getElementById("custPhone").value.trim();
+      const cleanPhone = rawPhone.replace(/[^0-9]/g, '').slice(-11);
+
+      try {
+        // ১. ব্লক লিস্ট ভেরিফিকেশন (Block Check)
+        const blockSnap = await get(child(ref(db), `blocked_numbers/${cleanPhone}`));
+        if (blockSnap.exists()) {
+          orderModal.innerHTML = `
+            <div class="modal-box" style="text-align: center;">
+              <i class="fas fa-ban" style="font-size: 50px; color: #ef4444; margin-bottom: 15px;"></i>
+              <h2 style="color: #ef4444;">অর্ডার গ্রহণ করা সম্ভব হচ্ছে না</h2>
+              <p style="margin: 12px 0 20px; color: #cbd5e1; font-size: 14px;">আপনার ফোন নম্বরটি সিস্টেম দ্বারা সাময়িকভাবে সীমাবদ্ধ (Restricted) করা হয়েছে। সহায়তার জন্য পেজে যোগাযোগ করুন।</p>
+              <button class="order-btn" style="background:#334155; color:#fff;" onclick="window.location.reload()">বন্ধ করুন</button>
+            </div>
+          `;
+          return;
+        }
+
+        // ২. রিয়েল অর্ডার ফায়ারবেসে পুশ
+        const qty = parseInt(document.getElementById("custQty").value) || 1;
+        const unitPrice = activeProduct?.price || 218;
+        const total = unitPrice * qty;
+        const address = document.getElementById("custAddress").value.trim();
+
+        const orderData = {
+          productId: activeProduct?.id || "",
+          productName: activeProduct?.name || "Exclusive Jewellery",
+          unitPrice: unitPrice,
+          customerName: document.getElementById("custName").value.trim(),
+          customerPhone: rawPhone,
+          customerAddress: address,
+          quantity: qty,
+          totalAmount: total,
+          dueAmount: total,
+          zone: detectZone(address),
+          paymentType: "Cash on Delivery",
+          status: "Processing",
+          createdAt: Date.now()
+        };
+
+        const ordersRef = ref(db, "orders");
+        const newRef = push(ordersRef);
+        await set(newRef, orderData);
+
+        orderModal.innerHTML = `
+          <div class="modal-box" style="text-align: center;">
+            <i class="fas fa-check-circle" style="font-size: 50px; color: #25d366; margin-bottom: 15px;"></i>
+            <h2 style="color: #ffd700;">ধন্যবাদ! অর্ডার সফল হয়েছে</h2>
+            <p style="margin: 12px 0 20px; color: #e2e8f0; font-size: 14.5px;">আমাদের প্রতিনিধি কিছুক্ষণের মধ্যেই আপনার নম্বরে কল দিয়ে অর্ডারটি নিশ্চিত করবেন।</p>
+            <button class="order-btn" onclick="window.location.reload()">ঠিক আছে</button>
+          </div>
+        `;
+      } catch (err) {
+        alert("ত্রুটি: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "অর্ডার কনফার্ম করুন";
+      }
+    });
+  </script>
+</body>
+</html>
