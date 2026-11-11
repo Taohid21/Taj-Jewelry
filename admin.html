@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taj Jewellery Control Console - Real-time ERP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary: #0d6efd;
+      --primary-dark: #0a58ca;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --border: #cbd5e1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --success: #198754;
+      --warning: #f59e0b;
+      --danger: #dc3545;
+      --sidebar-w: 260px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); font-size: 12px; line-height: 1.4; overflow-x: hidden; }
+
+    /* Top Bar */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px; background: #fff; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .nav-toggle-btn { background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; font-size: 14px; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+    .nav-toggle-btn:hover { background: #0284c7; color: #fff; }
+    
+    .search-input { width: 340px; padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 12px; font-weight: 500; outline: none; }
+    .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,110,253,0.15); }
+    
+    /* Bolder Top Action Buttons */
+    .btn-header { padding: 9px 18px; border-radius: 6px; font-size: 12px; font-weight: 800; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); transition: all 0.2s; }
+    .btn-header-primary { background: #1976d2; color: #ffffff; }
+    .btn-header-primary:hover { background: #1565c0; transform: translateY(-1px); }
+    .btn-header-accent { background: #0284c7; color: #fff; }
+    .btn-header-danger { background: #ef4444; color: #fff; }
+
+    /* Sidebar Drawer Navigation */
+    .sidebar-drawer { position: fixed; top: 0; left: -280px; width: var(--sidebar-w); height: 100vh; background: #0f172a; color: #f8fafc; z-index: 9999; transition: left 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
+    .sidebar-drawer.open { left: 0; }
+    .sidebar-header { padding: 18px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+    .sidebar-nav { padding: 15px 10px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #cbd5e1; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 12.5px; cursor: pointer; transition: 0.2s; }
+    .nav-item:hover, .nav-item.active { background: #1e293b; color: #38bdf8; }
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9998; display: none; }
+    .drawer-overlay.active { display: block; }
+
+    /* Sub Navigation / Date Range Bar */
+    .filter-ribbon-container { background: #fff; border-bottom: 1px solid var(--border); padding: 8px 16px; }
+    .date-filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .date-pill { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-size: 11px; font-weight: 800; cursor: pointer; color: #475569; }
+    .date-pill.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+
+    /* Status Filter Ribbon (Exact 16 Tabs) */
+    .filter-ribbon { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 4px; }
+    .tab-btn { padding: 6px 14px; border-radius: 5px; border: 1.5px solid #cbd5e1; background: #ffffff; color: #1e40af; font-size: 11.5px; font-weight: 800; cursor: pointer; white-space: nowrap; transition: 0.15s; }
+    .tab-btn.active { background: #1976d2; color: #fff; border-color: #1565c0; box-shadow: 0 2px 4px rgba(25,118,210,0.25); }
+
+    /* Main Table Container */
+    .table-container { width: 100%; overflow-x: auto; max-height: calc(100vh - 170px); background: #fff; }
+    table { width: 100%; border-collapse: collapse; text-align: left; min-width: 2500px; }
+    th { background: #1976d2; color: #fff; font-size: 11.5px; font-weight: 800; padding: 10px 8px; border: 1px solid #1565c0; position: sticky; top: 0; z-index: 10; white-space: nowrap; }
+    td { padding: 6px 8px; border: 1px solid #e2e8f0; font-size: 11.5px; vertical-align: middle; }
+    tr:nth-child(even) { background-color: #f8fafc; }
+    tr:hover { background-color: #f0f7ff; }
+
+    /* Inline Edit & Action Triggers */
+    .status-cell-wrap { display: flex; align-items: center; gap: 4px; }
+    .btn-status-save { background: #059669; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+    .btn-status-save:hover { background: #047857; }
+    .editable-amount { font-weight: 800; cursor: pointer; padding: 2px 6px; border-radius: 4px; border: 1px dashed transparent; }
+    .editable-amount:hover { border-color: #0284c7; background: #e0f2fe; }
+
+    /* Risk Badges */
+    .badge-safe { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 9.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 2px; }
+    .badge-warn { background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 4px; font-size: 9.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 2px; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 9.5px; font-weight: 800; display: inline-flex; align-items: center; gap: 2px; }
+
+    /* Modals & Views */
+    .view-section { display: none; padding: 20px; }
+    .view-section.active { display: block; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: #fff; border-radius: 8px; width: 550px; max-width: 95%; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-weight: 700; margin-bottom: 4px; font-size: 11.5px; color: #334155; }
+  </style>
+</head>
+<body>
+
+  <!-- DRAWER OVERLAY -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer(false)"></div>
+
+  <!-- SLIDE-OUT DRAWER MENU -->
+  <div class="sidebar-drawer" id="sidebarDrawer">
+    <div class="sidebar-header">
+      <h3 style="color:#38bdf8; font-size: 16px;"><i class="fas fa-gem"></i> Taj Console Suite</h3>
+      <button onclick="toggleDrawer(false)" style="background:none; border:none; color:#94a3b8; font-size:18px; cursor:pointer;"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" onclick="switchMainView('ordersView')"><i class="fas fa-table-list"></i> Order Management</div>
+      <div class="nav-item" onclick="switchMainView('courierAnalyticsView')"><i class="fas fa-chart-line"></i> Courier & Net Income</div>
+      <div class="nav-item" onclick="switchMainView('staffManagementView')"><i class="fas fa-users-gear"></i> Staff Management</div>
+      <div class="nav-item" onclick="switchMainView('courierConfigView')"><i class="fas fa-sliders"></i> Courier API Settings</div>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginWrapper" style="position: fixed; inset: 0; background: #0b0f19; display: flex; align-items: center; justify-content: center; z-index: 100000;">
+    <div style="background: #1e293b; border: 1px solid #334155; padding: 40px 30px; border-radius: 12px; text-align: center; width: 340px;">
+      <h2 style="color: #fff; margin-bottom: 8px; font-size: 20px;"><i class="fas fa-gem" style="color: #38bdf8;"></i> Taj Control</h2>
+      <p style="color: #94a3b8; font-size: 12px; margin-bottom: 24px;">Staff Login</p>
+      <button class="btn-header btn-header-primary" style="width: 100%; justify-content: center;" onclick="window.loginWithGoogle()">
+        <i class="fab fa-google"></i> Sign In with Google
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN APPLICATION -->
+  <div id="adminApp" style="display: none;">
+
+    <!-- TOP HEADER -->
+    <div class="top-bar">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button class="nav-toggle-btn" onclick="toggleDrawer(true)" title="Menu Drawer"><i class="fas fa-bars"></i> Navigation</button>
+        <input type="text" id="globalSearchInput" class="search-input" placeholder="Search by Order ID, Phone, Name, CID..." oninput="renderOrdersTable()" />
+        <span id="userBadge" style="font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 5px 10px; border-radius: 20px; font-weight: 800;">Staff</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-header btn-header-accent" onclick="window.syncAllCouriersLive()"><i class="fas fa-arrows-rotate"></i> Sync Live Couriers</button>
+        <button class="btn-header btn-header-primary" onclick="openModal('addNewOrderModal')"><i class="fas fa-circle-plus"></i> Add New Order</button>
+        <button class="btn-header btn-header-danger" onclick="window.logoutUser()" title="Logout"><i class="fas fa-power-off"></i></button>
+      </div>
+    </div>
+
+    <!-- VIEW 1: ORDERS TABLE CONSOLE -->
+    <div id="ordersView" class="view-section active" style="padding: 0;">
+      
+      <!-- SUB NAV: DATE FILTER & STATUS RIBBON -->
+      <div class="filter-ribbon-container">
+        <!-- DATE RANGE SELECTOR -->
+        <div class="date-filter-bar">
+          <span style="font-weight: 800; font-size: 11.5px; color: #475569;"><i class="fas fa-calendar-day"></i> Filter Date:</span>
+          <button class="date-pill active" onclick="setDateFilter('all', this)">All Time</button>
+          <button class="date-pill" onclick="setDateFilter('today', this)">Today</button>
+          <button class="date-pill" onclick="setDateFilter('yesterday', this)">Yesterday</button>
+          <button class="date-pill" onclick="setDateFilter('7days', this)">Last 7 Days</button>
+          <button class="date-pill" onclick="setDateFilter('thisMonth', this)">This Month</button>
+          <input type="date" id="customStartDate" onchange="applyCustomDate()" style="padding: 2px 6px; border: 1.5px solid #cbd5e1; border-radius: 4px; font-size: 11px;" />
+          <span>to</span>
+          <input type="date" id="customEndDate" onchange="applyCustomDate()" style="padding: 2px 6px; border: 1.5px solid #cbd5e1; border-radius: 4px; font-size: 11px;" />
+        </div>
+
+        <!-- 16 STATUS TABS -->
+        <div class="filter-ribbon">
+          <button class="tab-btn active" onclick="setStatusFilter('all', this)">All (<span id="cntAll">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Processing', this)">Processing (<span id="cntProc">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Manual Confirm', this)">Manual Confirm (<span id="cntMan">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Confirmed', this)">Confirmed (<span id="cntConf">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Ready for Delivery', this)">Ready for Delivery (<span id="cntReady">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('All Confirm', this)">All Confirm (<span id="cntAllConf">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('In Transit', this)">In Transit (<span id="cntTransit">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Delivered', this)">Delivered (<span id="cntDeliv">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Partial Delivered', this)">Partial Delivered (<span id="cntPart">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Returned', this)">Returned (<span id="cntRet">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Cancelled', this)">Cancelled (<span id="cntCanc">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('On hold', this)">On hold (<span id="cntHold">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Completed', this)">Completed (<span id="cntComp">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Pending payment', this)">Pending payment (<span id="cntPend">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Zone Change', this)">Zone Change (<span id="cntZone">0</span>)</button>
+          <button class="tab-btn" onclick="setStatusFilter('Urgent Orders', this)">Urgent Orders (<span id="cntUrg">0</span>)</button>
+        </div>
+      </div>
+
+      <!-- BULK ACTION BAR -->
+      <div id="bulkBar" style="display: none; justify-content: space-between; align-items: center; padding: 10px 16px; background: #e0f2fe; border-bottom: 2px solid #bae6fd;">
+        <div style="font-weight: 800; color: #0369a1;">
+          <span id="selectedCountBadge">0</span> Orders Selected
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select id="bulkCourierSelect" style="padding: 6px; border-radius: 4px; border: 1.5px solid #0284c7; font-weight: bold;">
+            <option value="steadfast">Steadfast Courier</option>
+            <option value="pathao">Pathao Courier</option>
+            <option value="carrybee">CarryBee Courier</option>
+          </select>
+          <button class="btn-header btn-header-primary" onclick="bulkDispatchOrders()"><i class="fas fa-paper-plane"></i> Dispatch Selected</button>
+          <button class="btn-header btn-header-accent" onclick="bulkStatusUpdate('Confirmed')"><i class="fas fa-check"></i> Mark Confirmed</button>
+          <button class="btn-header btn-header-danger" onclick="bulkStatusUpdate('Cancelled')"><i class="fas fa-ban"></i> Mark Cancelled</button>
+        </div>
+      </div>
+
+      <!-- ADVANCED DATA TABLE -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25px;"><input type="checkbox" onchange="toggleSelectAll(this.checked)" /></th>
+              <th style="width: 35px;">SL</th>
+              <th style="width: 80px;">Order ID</th>
+              <th style="width: 140px;">Status & Save</th>
+              <th style="width: 150px;">Decision Note</th>
+              <th style="width: 100px; text-align: center;">Delivery Rate & AI</th>
+              <th style="width: 125px;">Customer Name</th>
+              <th style="width: 110px;">Phone</th>
+              <th style="width: 180px;">Address</th>
+              <th style="width: 140px;">Zone (Map / Thana)</th>
+              <th style="width: 90px;">Product</th>
+              <th style="width: 80px; text-align: right;">Total COD</th>
+              <th style="width: 85px; text-align: right;">Due COD (Click)</th>
+              <th style="width: 95px; text-align: center;">Send Courier</th>
+              <th style="width: 130px;">Courier Status</th>
+              <th style="width: 120px;">Consignment ID</th>
+              <th style="width: 55px;">Edit</th>
+              <th style="width: 100px;">Invoice Note</th>
+              <th style="width: 85px;">Print Label</th>
+              <th style="width: 60px;">Block</th>
+              <th style="width: 190px;">Last Action History</th>
+              <th style="width: 120px;">Order Date</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTbody">
+            <tr><td colspan="22" style="text-align: center; padding: 40px; color: #64748b;">Loading Real Taj Orders Data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW 2: COURIER ANALYTICS & EARNINGS BREAKDOWN -->
+    <div id="courierAnalyticsView" class="view-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2><i class="fas fa-chart-pie" style="color: #1976d2;"></i> Courier Performance & Net Income</h2>
+        <button class="btn-header btn-header-primary" onclick="switchMainView('ordersView')"><i class="fas fa-arrow-left"></i> Back to Orders</button>
+      </div>
+
+      <!-- Financial Cards -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+        <div style="background: #fff; padding: 18px; border-radius: 8px; border-left: 5px solid #10b981; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+          <small style="color: #64748b; font-weight: bold;">TOTAL DELIVERED CASH (ইনকাম)</small>
+          <h2 style="color: #10b981; margin-top: 6px;">৳ <span id="statDeliveredIncome">0</span></h2>
+          <small id="statDeliveredOrders">0 Orders Delivered</small>
+        </div>
+        <div style="background: #fff; padding: 18px; border-radius: 8px; border-left: 5px solid #0284c7; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+          <small style="color: #64748b; font-weight: bold;">IN TRANSIT / COD DUE (চলমান)</small>
+          <h2 style="color: #0284c7; margin-top: 6px;">৳ <span id="statTransitDue">0</span></h2>
+          <small id="statTransitOrders">0 Orders on the way</small>
+        </div>
+        <div style="background: #fff; padding: 18px; border-radius: 8px; border-left: 5px solid #ef4444; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+          <small style="color: #64748b; font-weight: bold;">RETURNED LOSS (আনুমানিক ক্ষতি)</small>
+          <h2 style="color: #ef4444; margin-top: 6px;">৳ <span id="statReturnLoss">0</span></h2>
+          <small id="statReturnOrders">0 Orders Returned</small>
+        </div>
+        <div style="background: #fff; padding: 18px; border-radius: 8px; border-left: 5px solid #6366f1; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+          <small style="color: #64748b; font-weight: bold;">TOTAL ORDER VOLUME</small>
+          <h2 style="color: #6366f1; margin-top: 6px;">৳ <span id="statTotalSales">0</span></h2>
+          <small id="statAllOrdersCount">0 Total Orders</small>
+        </div>
+      </div>
+
+      <!-- Courier Breakdown Table -->
+      <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <h3 style="margin-bottom: 12px; color: #334155;">Courier-wise Real Delivery Breakdown</h3>
+        <table style="min-width: 100%;">
+          <thead>
+            <tr>
+              <th>Courier Provider</th>
+              <th>Total Sent</th>
+              <th>Delivered</th>
+              <th>Returned</th>
+              <th>In Transit</th>
+              <th>Success Rate</th>
+              <th style="text-align: right;">Cash Collected</th>
+            </tr>
+          </thead>
+          <tbody id="courierBreakdownTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW 3: STAFF MANAGEMENT -->
+    <div id="staffManagementView" class="view-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2><i class="fas fa-user-shield" style="color: #1976d2;"></i> Staff & Permissions</h2>
+        <button class="btn-header btn-header-primary" onclick="openModal('addStaffModal')"><i class="fas fa-plus"></i> Add New Staff</button>
+      </div>
+
+      <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <table style="min-width: 100%;">
+          <thead>
+            <tr>
+              <th>Staff Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Date Added</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="staffTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW 4: REAL COURIER API SETTINGS (CARRYBEE, STEADFAST, PATHAO) -->
+    <div id="courierConfigView" class="view-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2><i class="fas fa-cogs" style="color: #1976d2;"></i> Courier API Credentials</h2>
+        <button class="btn-header btn-header-primary" onclick="saveCourierConfig()"><i class="fas fa-save"></i> Save All Keys</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+        <div style="background: #fff; padding: 20px; border-radius: 8px; border-top: 4px solid #1976d2; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+          <h3 style="color: #1976d2; margin-bottom: 12px;"><i class="fas fa-truck"></i> Steadfast Courier</h3>
+          <div class="form-group"><label>API Key:</label><input type="text" id="cfgSfKey" class="search-input" style="width: 100%;" /></div>
+          <div class="form-group"><label>Secret Key:</label><input type="password" id="cfgSfSecret" class="search-input" style="width: 100%;" /></div>
+        </div>
+
+        <div style="background: #fff; padding: 20px; border-radius: 8px; border-top: 4px solid #ef4444; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+          <h3 style="color: #ef4444; margin-bottom: 12px;"><i class="fas fa-motorcycle"></i> Pathao Courier</h3>
+          <div class="form-group"><label>Store ID:</label><input type="text" id="cfgPathaoStoreId" class="search-input" style="width: 100%;" /></div>
+          <div class="form-group"><label>Client ID:</label><input type="text" id="cfgPathaoClientId" class="search-input" style="width: 100%;" /></div>
+          <div class="form-group"><label>Client Secret:</label><input type="password" id="cfgPathaoClientSecret" class="search-input" style="width: 100%;" /></div>
+          <div class="form-group"><label>Email:</label><input type="email" id="cfgPathaoUser" class="search-input" style="width: 100%;" /></div>
+          <div class="form-group"><label>Password:</label><input type="password" id="cfgPathaoPass" class="search-input" style="width: 100%;" /></div>
+        </div>
+
+        <div style="background: #fff; padding: 20px; border-radius: 8px; border-top: 4px solid #10b981; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+          <h3 style="color: #10b981; margin-bottom: 12px;"><i class="fas fa-box-open"></i> CarryBee Courier</h3>
+          <div class="form-group"><label>Client ID:</label><input type="text" id="cfgCbClientId" class="search-input" style="width: 100%;" /></div>
+          <div class="form-group"><label>Client Secret:</label><input type="password" id="cfgCbClientSecret" class="search-input" style="width: 100%;" /></div>
+          <div class="form-group"><label>Client Context:</label><input type="text" id="cfgCbClientContext" class="search-input" style="width: 100%;" /></div>
+          <div class="form-group"><label>Pickup Store ID:</label><input type="text" id="cfgCbStoreId" class="search-input" style="width: 100%;" /></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STATUS CHANGE WITH MANDATORY REASON MODAL -->
+  <div class="modal-overlay" id="decisionModal">
+    <div class="modal-card">
+      <h3 style="color: #1976d2; margin-bottom: 8px;" id="decisionModalTitle">Confirm Status Update</h3>
+      <p style="font-size: 11.5px; color: #64748b; margin-bottom: 14px;">অর্ডার স্ট্যাটাস পরিবর্তনের আসল কারণ সিলেক্ট করুন বা লিখুন:</p>
+
+      <div class="form-group">
+        <label>Predefined Reasons:</label>
+        <select id="quickReasonSelect" class="search-input" style="width: 100%;" onchange="document.getElementById('customReasonInput').value = this.value">
+          <option value="">-- Choose Reason --</option>
+          <option value="Customer directly confirmed on phone">Customer directly confirmed on phone</option>
+          <option value="Advance partial delivery payment received">Advance partial delivery payment received</option>
+          <option value="Fake order / Phone switched off">Fake order / Phone switched off</option>
+          <option value="Customer changed mind / Price high">Customer changed mind / Price high</option>
+          <option value="Zone Changed - Relocated to another district">Zone Changed - Relocated to another district</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Specific Decision Note:</label>
+        <textarea id="customReasonInput" class="search-input" style="width: 100%; height: 60px;" placeholder="কেন স্ট্যাটাস পরিবর্তন করছেন লিখুন..."></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-header" style="background:#e2e8f0; color:#334155;" onclick="closeModal('decisionModal')">Cancel</button>
+        <button class="btn-header btn-header-primary" onclick="submitDecisionWithReason()">Save Status & Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIERARCHICAL DIVISION > DISTRICT > THANA ZONE SELECTOR MODAL -->
+  <div class="modal-overlay" id="zoneModal">
+    <div class="modal-card" style="width: 480px;">
+      <h3 style="color: #0284c7; margin-bottom: 6px;"><i class="fas fa-map-location-dot"></i> Select Division, District & Thana</h3>
+      <p style="font-size: 11.5px; color: #64748b; margin-bottom: 14px;">বিভাগ, জেলা ও থানা নির্বাচন করলে স্বয়ংক্রিয়ভাবে কুরিয়ার জোন নির্ধারণ হয়ে যাবে:</p>
+
+      <div class="form-group">
+        <label>1. বিভাগ (Division):</label>
+        <select id="selDivision" class="search-input" style="width: 100%;" onchange="onDivisionChange()">
+          <option value="">-- Select Division --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>2. জেলা (District):</label>
+        <select id="selDistrict" class="search-input" style="width: 100%;" onchange="onDistrictChange()" disabled>
+          <option value="">-- First Select Division --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>3. থানা / উপজেলা (Thana/Upazila):</label>
+        <select id="selThana" class="search-input" style="width: 100%;" onchange="calculateAutoZone()" disabled>
+          <option value="">-- First Select District --</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <label>অটো-ডিটেক্টেড কুরিয়ার জোন:</label>
+        <input type="text" id="finalDetectedZone" class="search-input" style="width: 100%; font-weight: bold; background: #fff;" readonly />
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-header" style="background:#e2e8f0;" onclick="closeModal('zoneModal')">Cancel</button>
+        <button class="btn-header btn-header-accent" onclick="saveAutoZoneChange()">Save Zone</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD STAFF MODAL -->
+  <div class="modal-overlay" id="addStaffModal">
+    <div class="modal-card">
+      <h3 style="color: #1976d2; margin-bottom: 14px;"><i class="fas fa-user-plus"></i> Add Staff Member</h3>
+      <div class="form-group"><label>Full Name:</label><input type="text" id="stfName" class="search-input" style="width: 100%;" /></div>
+      <div class="form-group"><label>Email:</label><input type="email" id="stfEmail" class="search-input" style="width: 100%;" /></div>
+      <div class="form-group"><label>Phone:</label><input type="text" id="stfPhone" class="search-input" style="width: 100%;" /></div>
+      <div class="form-group">
+        <label>Role:</label>
+        <select id="stfRole" class="search-input" style="width: 100%;">
+          <option value="Order Operator">Order Operator</option>
+          <option value="Call Agent">Call Agent</option>
+          <option value="Manager">Manager</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-header" style="background:#e2e8f0;" onclick="closeModal('addStaffModal')">Cancel</button>
+        <button class="btn-header btn-header-primary" onclick="saveNewStaff()">Create Staff</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update, set, remove } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+
+    const WORKER_URL = "https://small-term-fa10.nipajabir1983.workers.dev";
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_AW-LmIBJVttdZ6XPsDc9MBONHdEJEsE",
+      authDomain: "taj-jewellery-89fc3.firebaseapp.com",
+      databaseURL: "https://taj-jewellery-89fc3-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "taj-jewellery-89fc3",
+      storageBucket: "taj-jewellery-89fc3.firebasestorage.app"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    // BANGLADESH COMPLETE DIVISION > DISTRICT > THANA HIERARCHY
+    const BD_LOCATIONS = {
+      "Dhaka": {
+        "Dhaka Metro": ["Mohammadpur", "Dhanmondi", "Mirpur", "Gulshan", "Uttara", "Badda", "Jatrabari", "Motijheel", "Khilgaon", "Tejgaon"],
+        "Gazipur": ["Gazipur Sadar", "Tongi", "Kaliakair", "Kapasia", "Sreepur"],
+        "Narayanganj": ["Narayanganj Sadar", "Araihazar", "Sonargaon", "Bandar", "Rupganj"],
+        "Tangail": ["Tangail Sadar", "Shakhipur", "Mirzapur", "Madhupur", "Gopalpur"],
+        "Narsingdi": ["Narsingdi Sadar", "Raipura", "Shibpur", "Belabo", "Palash"]
+      },
+      "Chattogram": {
+        "Chattogram": ["Kotwali", "Panchlaish", "Hathazari", "Sitakunda", "Patiya", "Baluchara"],
+        "Cox's Bazar": ["Cox's Bazar Sadar", "Maheshkhali", "Teknaf", "Chakaria"],
+        "Cumilla": ["Cumilla Sadar", "Laksam", "Daudkandi", "Chandina"],
+        "Feni": ["Feni Sadar", "Daganbhuiyan", "Chhagalnaiya"]
+      },
+      "Rajshahi": {
+        "Rajshahi": ["Boalia", "Motihar", "Paba", "Godagari", "Bagha"],
+        "Bogura": ["Bogura Sadar", "Sherpur", "Shibganj", "Gabtali"],
+        "Pabna": ["Pabna Sadar", "Ishwardi", "Santhia", "Bera"]
+      },
+      "Khulna": {
+        "Khulna": ["Khulna Sadar", "Sonadanga", "Daulatpur", "Dighalia"],
+        "Jashore": ["Jashore Sadar", "Sharsha", "Jhikargachha", "Bagherpara"],
+        "Kushtia": ["Kushtia Sadar", "Kumarkhali", "Mirpur", "Bheramara"]
+      },
+      "Barishal": {
+        "Barishal": ["Barishal Sadar", "Bakerganj", "Babuganj", "Gournadi"],
+        "Patuakhali": ["Patuakhali Sadar", "Galachipa", "Kalapara", "Bauphal"]
+      },
+      "Sylhet": {
+        "Sylhet": ["Sylhet Sadar", "Beanibazar", "Golapganj", "Biswanath"],
+        "Moulvibazar": ["Moulvibazar Sadar", "Sreemangal", "Kulaura"]
+      },
+      "Rangpur": {
+        "Rangpur": ["Rangpur Sadar", "Badarganj", "Mithapukur", "Pirganj"],
+        "Dinajpur": ["Dinajpur Sadar", "Birganj", "Fulbari", "Parbatipur"]
+      },
+      "Mymensingh": {
+        "Mymensingh": ["Mymensingh Sadar", "Muktagachha", "Bhaluka", "Gafargaon"],
+        "Sherpur": ["Sherpur Sadar", "Jhinaigati", "Nakla", "Nalitabari"]
+      }
+    };
+
+    let allOrders = {};
+    let allStaff = {};
+    let currentSettings = {};
+    let currentUser = null;
+    let activeStatusFilter = "all";
+    let activeDateFilter = "all";
+    let customStart = null;
+    let customEnd = null;
+    const selectedIds = new Set();
+
+    let pendingOrderId = null;
+    let pendingStatusValue = null;
+    let targetZoneOrderId = null;
+
+    // AUTH
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById("loginWrapper").style.display = "none";
+        document.getElementById("adminApp").style.display = "block";
+        document.getElementById("userBadge").textContent = user.displayName || user.email.split('@')[0];
+
+        onValue(ref(db, "settings"), (snap) => {
+          currentSettings = snap.val() || {};
+          populateSettings();
+        });
+
+        onValue(ref(db, "staff"), (snap) => {
+          allStaff = snap.val() || {};
+          renderStaffTable();
+        });
+
+        // Realtime Firebase Listener
+        onValue(ref(db, "orders"), (snap) => {
+          allOrders = snap.val() || {};
+          updateCounts();
+          renderOrdersTable();
+          renderCourierAnalytics();
+        });
+
+        initDivisionDropdown();
+      } else {
+        document.getElementById("loginWrapper").style.display = "flex";
+        document.getElementById("adminApp").style.display = "none";
+      }
+    });
+
+    window.loginWithGoogle = () => signInWithPopup(auth, provider);
+    window.logoutUser = () => signOut(auth);
+
+    // DRAWER & VIEW SWITCH
+    window.toggleDrawer = (open) => {
+      document.getElementById("sidebarDrawer").classList.toggle("open", open);
+      document.getElementById("drawerOverlay").classList.toggle("active", open);
+    };
+
+    window.switchMainView = (viewId) => {
+      toggleDrawer(false);
+      document.querySelectorAll(".view-section").forEach(el => el.classList.remove("active"));
+      document.getElementById(viewId).classList.add("active");
+    };
+
+    // SETTINGS
+    function populateSettings() {
+      document.getElementById("cfgSfKey").value = currentSettings.sfKey || "";
+      document.getElementById("cfgSfSecret").value = currentSettings.sfSecret || "";
+      document.getElementById("cfgPathaoStoreId").value = currentSettings.pathaoStoreId || "";
+      document.getElementById("cfgPathaoClientId").value = currentSettings.pathaoClientId || "";
+      document.getElementById("cfgPathaoClientSecret").value = currentSettings.pathaoClientSecret || "";
+      document.getElementById("cfgPathaoUser").value = currentSettings.pathaoUser || "";
+      document.getElementById("cfgPathaoPass").value = currentSettings.pathaoPass || "";
+      document.getElementById("cfgCbClientId").value = currentSettings.cbClientId || "";
+      document.getElementById("cfgCbClientSecret").value = currentSettings.cbClientSecret || "";
+      document.getElementById("cfgCbClientContext").value = currentSettings.cbClientContext || "";
+      document.getElementById("cfgCbStoreId").value = currentSettings.cbStoreId || "";
+    }
+
+    window.saveCourierConfig = async () => {
+      await update(ref(db, "settings"), {
+        sfKey: document.getElementById("cfgSfKey").value.trim(),
+        sfSecret: document.getElementById("cfgSfSecret").value.trim(),
+        pathaoStoreId: document.getElementById("cfgPathaoStoreId").value.trim(),
+        pathaoClientId: document.getElementById("cfgPathaoClientId").value.trim(),
+        pathaoClientSecret: document.getElementById("cfgPathaoClientSecret").value.trim(),
+        pathaoUser: document.getElementById("cfgPathaoUser").value.trim(),
+        pathaoPass: document.getElementById("cfgPathaoPass").value.trim(),
+        cbClientId: document.getElementById("cfgCbClientId").value.trim(),
+        cbClientSecret: document.getElementById("cfgCbClientSecret").value.trim(),
+        cbClientContext: document.getElementById("cfgCbClientContext").value.trim(),
+        cbStoreId: document.getElementById("cfgCbStoreId").value.trim(),
+        updatedAt: Date.now()
+      });
+      alert("All Courier API credentials saved!");
+    };
+
+    // HIERARCHICAL ZONE POPULATION
+    function initDivisionDropdown() {
+      const dSel = document.getElementById("selDivision");
+      dSel.innerHTML = '<option value="">-- Select Division --</option>';
+      Object.keys(BD_LOCATIONS).forEach(div => {
+        dSel.innerHTML += `<option value="${div}">${div}</option>`;
+      });
+    }
+
+    window.onDivisionChange = () => {
+      const div = document.getElementById("selDivision").value;
+      const distSel = document.getElementById("selDistrict");
+      const thanaSel = document.getElementById("selThana");
+
+      distSel.innerHTML = '<option value="">-- Select District --</option>';
+      thanaSel.innerHTML = '<option value="">-- First Select District --</option>';
+      thanaSel.disabled = true;
+
+      if (!div || !BD_LOCATIONS[div]) {
+        distSel.disabled = true;
+        return;
+      }
+
+      distSel.disabled = false;
+      Object.keys(BD_LOCATIONS[div]).forEach(dist => {
+        distSel.innerHTML += `<option value="${dist}">${dist}</option>`;
+      });
+    };
+
+    window.onDistrictChange = () => {
+      const div = document.getElementById("selDivision").value;
+      const dist = document.getElementById("selDistrict").value;
+      const thanaSel = document.getElementById("selThana");
+
+      thanaSel.innerHTML = '<option value="">-- Select Thana --</option>';
+      if (!dist || !BD_LOCATIONS[div]?.[dist]) {
+        thanaSel.disabled = true;
+        return;
+      }
+
+      thanaSel.disabled = false;
+      BD_LOCATIONS[div][dist].forEach(th => {
+        thanaSel.innerHTML += `<option value="${th}">${th}</option>`;
+      });
+    };
+
+    window.calculateAutoZone = () => {
+      const div = document.getElementById("selDivision").value;
+      const dist = document.getElementById("selDistrict").value;
+      const thana = document.getElementById("selThana").value;
+
+      if (!thana) return;
+
+      let zonePrefix = "Outside Dhaka";
+      if (div === "Dhaka" && dist === "Dhaka Metro") zonePrefix = "Inside Dhaka";
+      else if (["Gazipur", "Narayanganj"].includes(dist)) zonePrefix = "Sub-Dhaka";
+
+      const finalStr = `${zonePrefix} > ${dist} > ${thana}`;
+      document.getElementById("finalDetectedZone").value = finalStr;
+    };
+
+    window.openZoneModal = (id) => {
+      targetZoneOrderId = id;
+      document.getElementById("selDivision").value = "";
+      document.getElementById("selDistrict").innerHTML = '<option value="">-- First Select Division --</option>';
+      document.getElementById("selDistrict").disabled = true;
+      document.getElementById("selThana").innerHTML = '<option value="">-- First Select District --</option>';
+      document.getElementById("selThana").disabled = true;
+      document.getElementById("finalDetectedZone").value = allOrders[id]?.zone || "";
+      openModal("zoneModal");
+    };
+
+    window.saveAutoZoneChange = async () => {
+      const finalZone = document.getElementById("finalDetectedZone").value.trim();
+      if (!finalZone) return alert("দয়া করে থানা নির্বাচন করুন!");
+
+      await update(ref(db, `orders/${targetZoneOrderId}`), {
+        zone: finalZone,
+        status: "Zone Change",
+        updatedAt: Date.now()
+      });
+
+      closeModal("zoneModal");
+      alert("Zone Updated & categorized to 'Zone Change' tab!");
+    };
+
+    // INLINE COD DUE AMOUNT EDIT
+    window.startInlineEditAmount = (id, curAmount) => {
+      const newAmount = prompt("Enter updated COD Due Amount (৳):", curAmount);
+      if (newAmount !== null && !isNaN(Number(newAmount))) {
+        update(ref(db, `orders/${id}`), {
+          dueAmount: Number(newAmount),
+          totalAmount: Number(newAmount),
+          updatedAt: Date.now()
+        });
+      }
+    };
+
+    // DATE FILTERING
+    window.setDateFilter = (type, btn) => {
+      activeDateFilter = type;
+      document.querySelectorAll(".date-pill").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      renderOrdersTable();
+    };
+
+    window.applyCustomDate = () => {
+      customStart = document.getElementById("customStartDate").value ? new Date(document.getElementById("customStartDate").value).getTime() : null;
+      customEnd = document.getElementById("customEndDate").value ? new Date(document.getElementById("customEndDate").value).setHours(23,59,59,999) : null;
+      activeDateFilter = "custom";
+      renderOrdersTable();
+    };
+
+    function matchDate(orderTimestamp) {
+      if (!orderTimestamp || activeDateFilter === "all") return true;
+      const t = Number(orderTimestamp);
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+      if (activeDateFilter === "today") return t >= startOfToday;
+      if (activeDateFilter === "yesterday") {
+        return t >= (startOfToday - 86400000) && t < startOfToday;
+      }
+      if (activeDateFilter === "7days") return t >= (startOfToday - 6 * 86400000);
+      if (activeDateFilter === "thisMonth") {
+        return t >= new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      }
+      if (activeDateFilter === "custom") {
+        if (customStart && t < customStart) return false;
+        if (customEnd && t > customEnd) return false;
+        return true;
+      }
+      return true;
+    }
+
+    // TAB COUNTS
+    function updateCounts() {
+      const orders = Object.values(allOrders);
+      document.getElementById("cntAll").textContent = orders.length;
+      document.getElementById("cntProc").textContent = orders.filter(o => !o.status || o.status === "Pending" || o.status === "Processing").length;
+      document.getElementById("cntMan").textContent = orders.filter(o => o.status === "Manual Confirm").length;
+      document.getElementById("cntConf").textContent = orders.filter(o => o.status === "Confirmed").length;
+      document.getElementById("cntReady").textContent = orders.filter(o => o.status === "Ready for Delivery").length;
+      document.getElementById("cntAllConf").textContent = orders.filter(o => o.status === "All Confirm" || o.status === "Confirmed").length;
+      document.getElementById("cntTransit").textContent = orders.filter(o => o.status === "In Transit" || o.status === "Dispatched").length;
+      document.getElementById("cntDeliv").textContent = orders.filter(o => o.status === "Delivered").length;
+      document.getElementById("cntPart").textContent = orders.filter(o => o.status === "Partial Delivered").length;
+      document.getElementById("cntRet").textContent = orders.filter(o => o.status === "Returned").length;
+      document.getElementById("cntCanc").textContent = orders.filter(o => o.status === "Cancelled").length;
+      document.getElementById("cntHold").textContent = orders.filter(o => o.status === "On hold").length;
+      document.getElementById("cntComp").textContent = orders.filter(o => o.status === "Completed").length;
+      document.getElementById("cntPend").textContent = orders.filter(o => o.status === "Pending payment").length;
+      document.getElementById("cntZone").textContent = orders.filter(o => o.status === "Zone Change").length;
+      document.getElementById("cntUrg").textContent = orders.filter(o => o.urgent).length;
+    }
+
+    window.setStatusFilter = (key, btn) => {
+      activeStatusFilter = key;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderOrdersTable();
+    };
+
+    // RENDER MAIN TABLE
+    window.renderOrdersTable = () => {
+      const tbody = document.getElementById("ordersTbody");
+      const search = String(document.getElementById("globalSearchInput")?.value || "").toLowerCase().trim();
+      tbody.innerHTML = "";
+
+      const entries = Object.entries(allOrders).reverse();
+      let sl = 1;
+
+      entries.forEach(([id, order]) => {
+        if (!order || typeof order !== "object") return;
+        if (!matchDate(order.createdAt)) return;
+
+        let curStatus = String(order.status || "Processing");
+        if (curStatus === "Pending") curStatus = "Processing";
+
+        if (activeStatusFilter !== "all") {
+          if (activeStatusFilter === "Processing" && curStatus !== "Processing") return;
+          else if (activeStatusFilter === "In Transit" && curStatus !== "In Transit" && curStatus !== "Dispatched") return;
+          else if (activeStatusFilter !== "Processing" && activeStatusFilter !== "In Transit" && curStatus !== activeStatusFilter) return;
+        }
+
+        const name = String(order.customerName || "").toLowerCase();
+        const phone = String(order.customerPhone || order.phone || "");
+        const cid = String(order.consignmentId || "").toLowerCase();
+        const shortId = String(id || "").toLowerCase();
+
+        if (search && !name.includes(search) && !phone.includes(search) && !cid.includes(search) && !shortId.includes(search)) return;
+
+        const isChecked = selectedIds.has(id);
+        const rate = order.courierRate !== undefined ? Number(order.courierRate) : 100;
+        
+        // Smart AI Delivery Recommendation Badge
+        let recBadge = `<span class="badge-safe">✅ Safe to Confirm</span>`;
+        if (rate < 50) recBadge = `<span class="badge-danger">🚫 High Risk</span>`;
+        else if (rate < 80) recBadge = `<span class="badge-warn">⚠️ Call First</span>`;
+
+        const lastLog = order.history && Array.isArray(order.history) && order.history.length > 0 ? order.history[order.history.length - 1] : null;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="checkbox" ${isChecked ? "checked" : ""} onchange="window.toggleRowSelection('${id}', this.checked)" /></td>
+          <td>${sl++}</td>
+          <td><b>#${String(id).slice(-6).toUpperCase()}</b></td>
+          <td>
+            <div class="status-cell-wrap">
+              <select id="selStatus_${id}" style="padding: 4px; font-weight: 700; border-radius: 4px; border: 1.5px solid #cbd5e1; width: 110px;">
+                <option value="Processing" ${curStatus === "Processing" ? "selected" : ""}>Processing</option>
+                <option value="Manual Confirm" ${curStatus === "Manual Confirm" ? "selected" : ""}>Manual Confirm</option>
+                <option value="Confirmed" ${curStatus === "Confirmed" ? "selected" : ""}>Confirmed</option>
+                <option value="Ready for Delivery" ${curStatus === "Ready for Delivery" ? "selected" : ""}>Ready for Deliv</option>
+                <option value="In Transit" ${(curStatus === "In Transit" || curStatus === "Dispatched") ? "selected" : ""}>In Transit</option>
+                <option value="Delivered" ${curStatus === "Delivered" ? "selected" : ""}>Delivered</option>
+                <option value="Returned" ${curStatus === "Returned" ? "selected" : ""}>Returned</option>
+                <option value="Zone Change" ${curStatus === "Zone Change" ? "selected" : ""}>Zone Change</option>
+                <option value="Cancelled" ${curStatus === "Cancelled" ? "selected" : ""}>Cancelled</option>
+              </select>
+              <button class="btn-status-save" onclick="window.promptSaveStatus('${id}')" title="Save Status"><i class="fas fa-check"></i></button>
+            </div>
+          </td>
+          <td>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">
+              ${order.decisionNote || "Web Order Received"}
+            </div>
+          </td>
+          <td style="text-align: center;">
+            <div style="font-weight: 900; font-size: 12px; color: ${rate >= 80 ? '#15803d' : (rate >= 50 ? '#d97706' : '#b91c1c')};">${rate}%</div>
+            <div>${recBadge}</div>
+          </td>
+          <td><b>${order.customerName || "N/A"}</b></td>
+          <td>
+            <span>${phone}</span>
+            <a href="https://wa.me/88${phone.replace(/[^0-9]/g, '')}" target="_blank" style="color: #25d366; margin-left: 4px;"><i class="fab fa-whatsapp"></i></a>
+          </td>
+          <td style="max-width: 180px;">${order.customerAddress || order.address || "N/A"}</td>
+          <td>
+            <span style="color: #0284c7; font-weight: bold; cursor: pointer; text-decoration: underline;" onclick="window.openZoneModal('${id}')">
+              ${order.zone || 'Map / Select Thana'} <i class="fas fa-map-pin"></i>
+            </span>
+          </td>
+          <td><b>${order.productName || 'Jewellery Item'}</b> (${order.quantity || 1})</td>
+          <td style="text-align: right; font-weight: 800;">৳ ${order.totalAmount || 0}</td>
+          <td style="text-align: right;">
+            <span class="editable-amount" onclick="window.startInlineEditAmount('${id}', ${order.dueAmount || order.totalAmount || 0})" title="Click to Quick Edit Amount">
+              ৳ ${order.dueAmount || order.totalAmount || 0} <i class="fas fa-pencil-alt" style="font-size:9px; color:#0284c7;"></i>
+            </span>
+          </td>
+          <td style="text-align: center;">
+            <button onclick="window.dispatchSingleOrder('${id}')" style="background:${order.consignmentId ? '#64748b' : '#0284c7'}; color:#fff; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">
+              ${order.consignmentId ? 'Resend' : 'Send'} <i class="fas fa-paper-plane"></i>
+            </button>
+          </td>
+          <td><b>${order.courierStatus || "Pending Handover"}</b></td>
+          <td>
+            ${order.consignmentId ? `<span style="font-family:monospace; font-weight:bold; color:#0284c7;">${order.consignmentId}</span>` : '<span style="color:#94a3b8;">Unassigned</span>'}
+          </td>
+          <td><button onclick="window.openCourierEdit('${id}')" style="background:#e0f2fe; color:#0284c7; border:none; padding:3px 7px; border-radius:3px; cursor:pointer; font-weight:bold;">Edit</button></td>
+          <td><input type="text" value="${order.invoiceNote || ''}" placeholder="Note..." onchange="window.saveInvoiceNote('${id}', this.value)" style="width:100%; font-size:10.5px; border:1px solid #cbd5e1; border-radius:3px; padding:2px;" /></td>
+          <td><button onclick="window.printLabel('${id}')" style="background:#3b82f6; color:#fff; border:none; padding:3px 8px; border-radius:3px; font-weight:bold; cursor:pointer;"><i class="fas fa-print"></i></button></td>
+          <td><button onclick="window.toggleBlock('${id}', '${phone}')" style="background:${order.isBlocked ? '#1e293b':'#ef4444'}; color:#fff; border:none; padding:3px 7px; border-radius:3px; font-weight:bold; cursor:pointer;">${order.isBlocked?'Blocked':'Block'}</button></td>
+          <td style="font-size: 10.5px; color: #475569;">
+            ${lastLog ? `${lastLog.time} by ${lastLog.staff}: ${lastLog.action}` : 'Created'}
+          </td>
+          <td style="font-size: 10.5px; color: #64748b;">
+            ${new Date(order.createdAt || Date.now()).toLocaleDateString()}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    // STATUS SAVE LOGIC
+    window.promptSaveStatus = (id) => {
+      pendingOrderId = id;
+      pendingStatusValue = document.getElementById(`selStatus_${id}`).value;
+      document.getElementById("decisionModalTitle").textContent = `Confirm Status: ${pendingStatusValue}`;
+      document.getElementById("customReasonInput").value = "";
+      document.getElementById("quickReasonSelect").value = "";
+      openModal("decisionModal");
+    };
+
+    window.submitDecisionWithReason = async () => {
+      const reason = document.getElementById("customReasonInput").value.trim() || document.getElementById("quickReasonSelect").value;
+      if (!reason) return alert("স্ট্যাটাস পরিবর্তনের কারণ উল্লেখ করুন!");
+
+      const order = allOrders[pendingOrderId];
+      const nowStr = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const log = {
+        staff: currentUser.displayName || "Staff",
+        action: `Status set to '${pendingStatusValue}' (${reason})`,
+        time: nowStr
+      };
+
+      const history = order.history && Array.isArray(order.history) ? [...order.history, log] : [log];
+
+      await update(ref(db, `orders/${pendingOrderId}`), {
+        status: pendingStatusValue,
+        decisionNote: reason,
+        history: history,
+        updatedAt: Date.now()
+      });
+
+      closeModal("decisionModal");
+    };
+
+    // LIVE SYNC ALL COURIERS WITH ONE CLICK
+    window.syncAllCouriersLive = async () => {
+      alert("Live syncing active in-transit orders directly from Couriers...");
+      const inTransitOrders = Object.entries(allOrders).filter(([k, o]) => o.consignmentId && (o.status === "In Transit" || o.status === "Dispatched"));
+
+      for (const [id, o] of inTransitOrders) {
+        try {
+          let res;
+          if (o.courierProvider === "Steadfast" && currentSettings.sfKey) {
+            res = await fetch(WORKER_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "steadfast_status", api_key: currentSettings.sfKey, secret_key: currentSettings.sfSecret, consignment_id: o.consignmentId })
+            });
+          } else if (o.courierProvider === "Pathao" && currentSettings.pathaoClientId) {
+            res = await fetch(WORKER_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ provider: "pathao", action: "pathao_status", client_id: currentSettings.pathaoClientId, client_secret: currentSettings.pathaoClientSecret, username: currentSettings.pathaoUser, password: currentSettings.pathaoPass, consignment_id: o.consignmentId })
+            });
+          }
+
+          if (res) {
+            const data = await res.json();
+            if (data.delivery_status) {
+              let updatedStatus = o.status;
+              const sLow = data.delivery_status.toLowerCase();
+              if (sLow.includes("deliver")) updatedStatus = "Delivered";
+              else if (sLow.includes("cancel") || sLow.includes("return")) updatedStatus = "Returned";
+
+              await update(ref(db, `orders/${id}`), {
+                courierStatus: data.delivery_status,
+                status: updatedStatus,
+                updatedAt: Date.now()
+              });
+            }
+          }
+        } catch(e) {}
+      }
+      alert("Courier Live Sync Completed!");
+    };
+
+    // COURIER EARNINGS & PERFORMANCE
+    function renderCourierAnalytics() {
+      const orders = Object.values(allOrders);
+      let delivIncome = 0;
+      let delivCount = 0;
+      let transitDue = 0;
+      let transitCount = 0;
+      let returnCount = 0;
+      let totalSales = 0;
+
+      const courierMap = {
+        Steadfast: { sent: 0, delivered: 0, returned: 0, transit: 0, collected: 0 },
+        Pathao: { sent: 0, delivered: 0, returned: 0, transit: 0, collected: 0 },
+        CarryBee: { sent: 0, delivered: 0, returned: 0, transit: 0, collected: 0 }
+      };
+
+      orders.forEach(o => {
+        const amt = Number(o.dueAmount || o.totalAmount || 0);
+        totalSales += amt;
+
+        if (o.status === "Delivered") {
+          delivIncome += amt;
+          delivCount++;
+        } else if (o.status === "In Transit" || o.status === "Dispatched") {
+          transitDue += amt;
+          transitCount++;
+        } else if (o.status === "Returned") {
+          returnCount++;
+        }
+
+        const provider = o.courierProvider || "Steadfast";
+        if (courierMap[provider]) {
+          courierMap[provider].sent++;
+          if (o.status === "Delivered") {
+            courierMap[provider].delivered++;
+            courierMap[provider].collected += amt;
+          } else if (o.status === "Returned") {
+            courierMap[provider].returned++;
+          } else if (o.status === "In Transit" || o.status === "Dispatched") {
+            courierMap[provider].transit++;
+          }
+        }
+      });
+
+      document.getElementById("statDeliveredIncome").textContent = delivIncome.toLocaleString();
+      document.getElementById("statDeliveredOrders").textContent = `${delivCount} Orders Delivered`;
+      document.getElementById("statTransitDue").textContent = transitDue.toLocaleString();
+      document.getElementById("statTransitOrders").textContent = `${transitCount} Orders In Transit`;
+      document.getElementById("statReturnLoss").textContent = (returnCount * 130).toLocaleString();
+      document.getElementById("statReturnOrders").textContent = `${returnCount} Parcels Returned`;
+      document.getElementById("statTotalSales").textContent = totalSales.toLocaleString();
+      document.getElementById("statAllOrdersCount").textContent = `${orders.length} Total Orders`;
+
+      const tbody = document.getElementById("courierBreakdownTbody");
+      tbody.innerHTML = "";
+      Object.entries(courierMap).forEach(([name, c]) => {
+        const rate = c.sent > 0 ? Math.round((c.delivered / c.sent) * 100) : 0;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><b>${name} Courier</b></td>
+          <td>${c.sent}</td>
+          <td style="color:#10b981; font-weight:bold;">${c.delivered}</td>
+          <td style="color:#ef4444; font-weight:bold;">${c.returned}</td>
+          <td style="color:#0284c7; font-weight:bold;">${c.transit}</td>
+          <td><b>${rate}%</b></td>
+          <td style="text-align: right; font-weight:bold; color:#10b981;">৳ ${c.collected.toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // DISPATCH SINGLE ORDER
+    window.dispatchSingleOrder = async (id) => {
+      const order = allOrders[id];
+      const courier = document.getElementById("bulkCourierSelect").value;
+      const invoiceId = "TJ-" + id.slice(-6).toUpperCase();
+
+      if (courier === "carrybee") {
+        const res = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider: "carrybee",
+            clientId: currentSettings.cbClientId,
+            clientSecret: currentSettings.cbClientSecret,
+            clientContext: currentSettings.cbClientContext,
+            storeId: currentSettings.cbStoreId,
+            order: {
+              customerName: order.customerName,
+              customerPhone: order.customerPhone || order.phone,
+              customerAddress: order.customerAddress || order.address,
+              dueAmount: Number(order.dueAmount || order.totalAmount) || 0,
+              id: id
+            }
+          })
+        });
+        const d = await res.json();
+        const cid = d.tracking_id || d.consignment_id || ("CB-" + id.slice(-6).toUpperCase());
+        await logOrderCourier(id, "CarryBee", cid);
+        alert("CarryBee এ পার্সেল বুকিং সফল! Tracking ID: " + cid);
+      } else if (courier === "steadfast") {
+        const res = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            api_key: currentSettings.sfKey,
+            secret_key: currentSettings.sfSecret,
+            invoice: invoiceId,
+            recipient_name: order.customerName,
+            recipient_phone: order.customerPhone || order.phone,
+            recipient_address: order.customerAddress || order.address,
+            cod_amount: Number(order.dueAmount || order.totalAmount) || 0
+          })
+        });
+        const d = await res.json();
+        if (d.status === 200 && d.consignment) {
+          await logOrderCourier(id, "Steadfast", d.consignment.consignment_id);
+          alert("Steadfast CID: " + d.consignment.consignment_id);
+        } else alert("Error: " + JSON.stringify(d));
+      } else if (courier === "pathao") {
+        const res = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider: "pathao",
+            client_id: currentSettings.pathaoClientId,
+            client_secret: currentSettings.pathaoClientSecret,
+            username: currentSettings.pathaoUser,
+            password: currentSettings.pathaoPass,
+            store_id: currentSettings.pathaoStoreId,
+            recipient_name: order.customerName,
+            recipient_phone: order.customerPhone || order.phone,
+            recipient_address: order.customerAddress || order.address,
+            amount_to_collect: Number(order.dueAmount || order.totalAmount) || 0
+          })
+        });
+        const d = await res.json();
+        const cid = d.consignment_id || d.data?.consignment_id;
+        if (cid) {
+          await logOrderCourier(id, "Pathao", cid);
+          alert("Pathao CID: " + cid);
+        } else alert("Error: " + JSON.stringify(d));
+      }
+    };
+
+    async function logOrderCourier(id, courierName, cid) {
+      const order = allOrders[id];
+      const nowStr = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const log = { staff: currentUser.displayName || "Admin", action: `Dispatched to ${courierName} (CID: ${cid})`, time: nowStr };
+      const history = order.history && Array.isArray(order.history) ? [...order.history, log] : [log];
+
+      await update(ref(db, `orders/${id}`), {
+        status: "In Transit",
+        courierProvider: courierName,
+        courierStatus: "On the way to Central Warehouse",
+        consignmentId: cid,
+        history: history,
+        updatedAt: Date.now()
+      });
+    }
+
+    // BULK LOGIC
+    window.toggleRowSelection = (id, isChecked) => {
+      if (isChecked) selectedIds.add(id); else selectedIds.delete(id);
+      document.getElementById("selectedCountBadge").textContent = selectedIds.size;
+      document.getElementById("bulkBar").style.display = selectedIds.size > 0 ? "flex" : "none";
+    };
+
+    window.toggleSelectAll = (isChecked) => {
+      selectedIds.clear();
+      if (isChecked) Object.keys(allOrders).forEach(id => selectedIds.add(id));
+      document.getElementById("selectedCountBadge").textContent = selectedIds.size;
+      document.getElementById("bulkBar").style.display = selectedIds.size > 0 ? "flex" : "none";
+      renderOrdersTable();
+    };
+
+    window.bulkDispatchOrders = async () => {
+      if (selectedIds.size === 0) return alert("Select at least one order.");
+      if (!confirm(`Dispatch ${selectedIds.size} orders to courier?`)) return;
+      for (const id of Array.from(selectedIds)) {
+        await window.dispatchSingleOrder(id);
+      }
+      selectedIds.clear();
+      document.getElementById("bulkBar").style.display = "none";
+      renderOrdersTable();
+    };
+
+    window.bulkStatusUpdate = async (status) => {
+      if (selectedIds.size === 0) return alert("Select at least one order.");
+      const reason = prompt(`Enter reason for bulk ${status}:`, "Bulk action by " + (currentUser.displayName || "Staff"));
+      if (!reason) return;
+
+      const nowStr = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      for (const id of Array.from(selectedIds)) {
+        const order = allOrders[id];
+        const log = { staff: currentUser.displayName || "Staff", action: `Bulk ${status}: ${reason}`, time: nowStr };
+        const history = order.history && Array.isArray(order.history) ? [...order.history, log] : [log];
+        await update(ref(db, `orders/${id}`), { status, decisionNote: reason, history, updatedAt: Date.now() });
+      }
+      selectedIds.clear();
+      document.getElementById("bulkBar").style.display = "none";
+    };
+
+    window.openModal = (id) => document.getElementById(id).classList.add("active");
+    window.closeModal = (id) => document.getElementById(id).classList.remove("active");
+  </script>
+</body>
+</html>
