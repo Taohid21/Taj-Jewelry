@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Taj Jewellery - Official Store</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1323985103142802');
+  fbq('track', 'PageView');
+  </script>
+  <!-- End Meta Pixel Code -->
+
   <style>
     * {
       margin: 0;
@@ -132,6 +148,11 @@
       transform: translateY(-2px);
       box-shadow: 0 10px 30px rgba(212, 175, 55, 0.7);
     }
+    .order-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
 
     .modal-overlay {
       position: fixed;
@@ -149,7 +170,9 @@
       background: #141622;
       border: 1.5px solid #d4af37;
       width: 100%;
-      max-width: 450px;
+      max-width: 460px;
+      max-height: 92vh;
+      overflow-y: auto;
       border-radius: 16px;
       padding: 26px;
       position: relative;
@@ -165,7 +188,7 @@
       font-size: 24px;
       cursor: pointer;
     }
-    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group { margin-bottom: 14px; text-align: left; }
     .form-group label {
       display: block;
       font-size: 13.5px;
@@ -173,9 +196,11 @@
       font-weight: 700;
       margin-bottom: 6px;
     }
-    .form-group input, .form-group textarea {
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
       width: 100%;
-      padding: 13px;
+      padding: 12px 13px;
       border-radius: 8px;
       border: 1.5px solid #334155;
       background: #0b0c10;
@@ -184,9 +209,15 @@
       font-weight: 600;
       outline: none;
     }
-    .form-group input:focus, .form-group textarea:focus {
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
       border-color: #ffd700;
       box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    .form-group input.input-error {
+      border-color: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
     }
     .cod-badge {
       display: inline-block;
@@ -199,9 +230,97 @@
       margin-bottom: 16px;
       border: 1px solid rgba(255, 215, 0, 0.3);
     }
+
+    /* অটোমেটিক ডেলিভারি জোন স্টাইল (লক করা) */
+    .delivery-zone-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .zone-box {
+      padding: 11px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #334155;
+      background: #0b0c10;
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      opacity: 0.65;
+      transition: all 0.2s ease;
+    }
+    .zone-box.selected {
+      border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.12);
+      color: #ffd700;
+      opacity: 1;
+    }
+    .zone-box input[type="radio"] {
+      width: auto;
+      accent-color: #ffd700;
+      pointer-events: none;
+    }
+    .zone-lock-note {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* অর্ডার সামারি বক্স */
+    .order-summary {
+      background: #0b0c10;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      color: #cbd5e1;
+    }
+    .summary-row.total {
+      border-top: 1px dashed #334155;
+      padding-top: 8px;
+      margin-top: 6px;
+      margin-bottom: 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffd700;
+    }
+
+    /* সতর্কতা বার্তা */
+    .error-alert {
+      display: none;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .error-alert.show {
+      display: block;
+    }
   </style>
 </head>
 <body>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1323985103142802&ev=PageView&noscript=1"
+  /></noscript>
+
   <header>
     <a href="#" class="logo">TAJ JEWELLERY</a>
     <div class="social-links">
@@ -233,24 +352,151 @@
     <div class="modal-box">
       <button class="close-btn" id="closeOrderModal">&times;</button>
       <div class="cod-badge"><i class="fas fa-shield-alt"></i> ক্যাশ অন ডেলিভারি (পণ্য পেয়ে টাকা দিন)</div>
-      
-      <form id="orderForm">
+
+      <div class="error-alert" id="formWarning">
+        <i class="fas fa-exclamation-triangle"></i> <span id="formWarningText"></span>
+      </div>
+
+      <form id="orderForm" novalidate>
         <div class="form-group">
           <label>আপনার নাম (Full Name):</label>
           <input type="text" id="custName" placeholder="উদা: মোঃ তাওহিদ" required />
         </div>
+
         <div class="form-group">
-          <label>মোবাইল নম্বর (Active Mobile):</label>
-          <input type="tel" id="custPhone" placeholder="017xxxxxxxx" required />
+          <label>মোবাইল নম্বর (সঠিক ১১ ডিজিট):</label>
+          <input type="tel" id="custPhone" placeholder="017XXXXXXXX" maxlength="15" required />
         </div>
+
         <div class="form-group">
-          <label>ডেলিভারির সম্পূর্ণ ঠিকানা (জেলা ও থানা সহ):</label>
-          <textarea id="custAddress" rows="3" placeholder="গ্রাম/রোড, থানা, জেলা" required></textarea>
+          <label>জেলা নির্বাচন করুন (District):</label>
+          <select id="custDistrict" required>
+            <option value="">-- আপনার জেলা সিলেক্ট করুন --</option>
+            <optgroup label="ঢাকা বিভাগ">
+              <option value="Dhaka">ঢাকা (Dhaka)</option>
+              <option value="Gazipur">গাজীপুর (Gazipur)</option>
+              <option value="Narayanganj">নারায়ণগঞ্জ (Narayanganj)</option>
+              <option value="Narsingdi">নরসিংদী (Narsingdi)</option>
+              <option value="Munshiganj">মুন্সীগঞ্জ (Munshiganj)</option>
+              <option value="Manikganj">মানিকগঞ্জ (Manikganj)</option>
+              <option value="Tangail">টাঙ্গাইল (Tangail)</option>
+              <option value="Kishoreganj">কিশোরগঞ্জ (Kishoreganj)</option>
+              <option value="Faridpur">ফরিদপুর (Faridpur)</option>
+              <option value="Gopalganj">গোপালগঞ্জ (Gopalganj)</option>
+              <option value="Madaripur">মাদারীপুর (Madaripur)</option>
+              <option value="Rajbari">রাজবাড়ী (Rajbari)</option>
+              <option value="Shariatpur">শরীয়তপুর (Shariatpur)</option>
+            </optgroup>
+            <optgroup label="চট্টগ্রাম বিভাগ">
+              <option value="Chattogram">চট্টগ্রাম (Chattogram)</option>
+              <option value="Cox's Bazar">কক্সবাজার (Cox's Bazar)</option>
+              <option value="Cumilla">কুমিল্লা (Cumilla)</option>
+              <option value="Brahmanbaria">ব্রাহ্মণবাড়িয়া (Brahmanbaria)</option>
+              <option value="Chandpur">চাঁদপুর (Chandpur)</option>
+              <option value="Noakhali">নোয়াখালী (Noakhali)</option>
+              <option value="Lakshmipur">লক্ষ্মীপুর (Lakshmipur)</option>
+              <option value="Feni">ফেনী (Feni)</option>
+              <option value="Khagrachhari">খাগড়াছড়ি (Khagrachhari)</option>
+              <option value="Rangamati">রাঙ্গামাটি (Rangamati)</option>
+              <option value="Bandarban">বান্দরবান (Bandarban)</option>
+            </optgroup>
+            <optgroup label="রাজশাহী বিভাগ">
+              <option value="Rajshahi">রাজশাহী (Rajshahi)</option>
+              <option value="Bogura">বগুড়া (Bogura)</option>
+              <option value="Pabna">পাবনা (Pabna)</option>
+              <option value="Sirajganj">সিরাজগঞ্জ (Sirajganj)</option>
+              <option value="Natore">নাটোর (Natore)</option>
+              <option value="Naogaon">নওগাঁ (Naogaon)</option>
+              <option value="Chapainawabganj">চাঁপাইনবাবগঞ্জ (Chapainawabganj)</option>
+              <option value="Joypurhat">জয়পুরহাট (Joypurhat)</option>
+            </optgroup>
+            <optgroup label="খুলনা বিভাগ">
+              <option value="Khulna">খুলনা (Khulna)</option>
+              <option value="Jashore">যশোর (Jashore)</option>
+              <option value="Satkhira">সাতক্ষীরা (Satkhira)</option>
+              <option value="Bagerhat">বাগেরহাট (Bagerhat)</option>
+              <option value="Jhenaidah">ঝিনাইদহ (Jhenaidah)</option>
+              <option value="Magura">মাগুরা (Magura)</option>
+              <option value="Narail">নড়াইল (Narail)</option>
+              <option value="Kushtia">কুষ্টিয়া (Kushtia)</option>
+              <option value="Chuadanga">চুয়াডাঙ্গা (Chuadanga)</option>
+              <option value="Meherpur">মেহেরপুর (Meherpur)</option>
+            </optgroup>
+            <optgroup label="সিলেট বিভাগ">
+              <option value="Sylhet">সিলেট (Sylhet)</option>
+              <option value="Moulvibazar">মৌলভীবাজার (Moulvibazar)</option>
+              <option value="Habiganj">হবিগঞ্জ (Habiganj)</option>
+              <option value="Sunamganj">সুনামগঞ্জ (Sunamganj)</option>
+            </optgroup>
+            <optgroup label="রংপুর বিভাগ">
+              <option value="Rangpur">রংপুর (Rangpur)</option>
+              <option value="Dinajpur">দিনাজপুর (Dinajpur)</option>
+              <option value="Gaibandha">গাইবান্ধা (Gaibandha)</option>
+              <option value="Kurigram">কুড়িগ্রাম (Kurigram)</option>
+              <option value="Lalmonirhat">লালমনিরহাট (Lalmonirhat)</option>
+              <option value="Nilphamari">নীলফামারী (Nilphamari)</option>
+              <option value="Panchagarh">পঞ্চগড় (Panchagarh)</option>
+              <option value="Thakurgaon">ঠাকুরগাঁও (Thakurgaon)</option>
+            </optgroup>
+            <optgroup label="বরিশাল বিভাগ">
+              <option value="Barishal">বরিশাল (Barishal)</option>
+              <option value="Patuakhali">পটুয়াখালী (Patuakhali)</option>
+              <option value="Bhola">ভোলা (Bhola)</option>
+              <option value="Pirojpur">পিরোজপুর (Pirojpur)</option>
+              <option value="Barguna">বরগুনা (Barguna)</option>
+              <option value="Jhalokati">ঝালকাঠি (Jhalokati)</option>
+            </optgroup>
+            <optgroup label="ময়মনসিংহ বিভাগ">
+              <option value="Mymensingh">ময়মনসিংহ (Mymensingh)</option>
+              <option value="Jamalpur">জামালপুর (Jamalpur)</option>
+              <option value="Netrokona">নেত্রকোণা (Netrokona)</option>
+              <option value="Sherpur">শেরপুর (Sherpur)</option>
+            </optgroup>
+          </select>
         </div>
+
+        <div class="form-group">
+          <label>ডেলিভারি এরিয়া (অটোমেটিক):</label>
+          <div class="delivery-zone-wrapper">
+            <div class="zone-box" id="zoneInsideBox">
+              <input type="radio" name="deliveryZoneDisplay" id="zoneInside" value="inside" disabled />
+              <span>ঢাকার ভিতরে (৳৬০)</span>
+            </div>
+            <div class="zone-box" id="zoneOutsideBox">
+              <input type="radio" name="deliveryZoneDisplay" id="zoneOutside" value="outside" disabled />
+              <span>ঢাকার বাইরে (৳১২০)</span>
+            </div>
+          </div>
+          <div class="zone-lock-note">
+            <i class="fas fa-lock"></i> জেলা অনুযায়ী অটোমেটিক সিলেক্ট হবে (পরিবর্তনযোগ্য নয়)
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>ডেলিভারির সম্পূর্ণ ঠিকানা (থানা ও বাসা/গ্রাম সহ):</label>
+          <textarea id="custAddress" rows="2" placeholder="গ্রাম/রোড, থানা, বাসা নম্বর" required></textarea>
+        </div>
+
         <div class="form-group">
           <label>পরিমাণ (Quantity):</label>
           <input type="number" id="custQty" value="1" min="1" required />
         </div>
+
+        <div class="order-summary">
+          <div class="summary-row">
+            <span>পণ্যের মূল্য:</span>
+            <span id="summarySubtotal">৳ 0</span>
+          </div>
+          <div class="summary-row">
+            <span>ডেলিভারি চার্জ:</span>
+            <span id="summaryDelivery">জেলা সিলেক্ট করুন</span>
+          </div>
+          <div class="summary-row total">
+            <span>সর্বমোট (ক্যাশ অন ডেলিভারি):</span>
+            <span id="summaryTotal">৳ 0</span>
+          </div>
+        </div>
+
         <button type="submit" class="order-btn" id="submitOrderBtn">অর্ডার কনফার্ম করুন</button>
       </form>
     </div>
@@ -271,9 +517,98 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    const INSIDE_DHAKA_CHARGE = 60;
+    const OUTSIDE_DHAKA_CHARGE = 120;
+
     let activeProduct = null;
+    let currentDeliveryZone = ""; // "ঢাকার ভিতরে" অথবা "ঢাকার বাইরে"
+    let currentDeliveryCharge = 0;
+
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("id");
+
+    // বাংলা সংখ্যাকে ইংরেজি সংখ্যায় রূপান্তর
+    function toEnglishDigits(str) {
+      const bn = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+      return str.replace(/[০-৯]/g, d => bn.indexOf(d));
+    }
+
+    // সঠিক বাংলাদেশি মোবাইল নম্বর যাচাই (013-019 দিয়ে শুরু ১১ ডিজিট)
+    function normalizeAndValidatePhone(input) {
+      let cleaned = toEnglishDigits(input.trim()).replace(/[^0-9]/g, '');
+      if (cleaned.startsWith('8801') && cleaned.length === 13) {
+        cleaned = '0' + cleaned.slice(3);
+      }
+      const bdPhoneRegex = /^01[3-9]\d{8}$/;
+      return {
+        isValid: bdPhoneRegex.test(cleaned),
+        phone: cleaned
+      };
+    }
+
+    function showWarning(msg, focusEl = null) {
+      const box = document.getElementById("formWarning");
+      document.getElementById("formWarningText").textContent = msg;
+      box.classList.add("show");
+      box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (focusEl) focusEl.focus();
+    }
+
+    function hideWarning() {
+      document.getElementById("formWarning").classList.remove("show");
+      document.getElementById("custPhone").classList.remove("input-error");
+    }
+
+    function updateOrderSummary() {
+      const unitPrice = Number(activeProduct?.price || 218);
+      const qty = Math.max(1, parseInt(document.getElementById("custQty").value) || 1);
+      const subtotal = unitPrice * qty;
+      const total = subtotal + currentDeliveryCharge;
+
+      document.getElementById("summarySubtotal").textContent = `৳ ${subtotal}`;
+      document.getElementById("summaryDelivery").textContent = currentDeliveryZone
+        ? `${currentDeliveryZone} (৳ ${currentDeliveryCharge})`
+        : "জেলা সিলেক্ট করুন";
+      document.getElementById("summaryTotal").textContent = `৳ ${total}`;
+    }
+
+    // জেলা পরিবর্তনের সাথে সাথে অটোমেটিক ঢাকার ভিতরে/বাইরে সেট হবে
+    document.getElementById("custDistrict").addEventListener("change", (e) => {
+      const district = e.target.value;
+      const insideRadio = document.getElementById("zoneInside");
+      const outsideRadio = document.getElementById("zoneOutside");
+      const insideBox = document.getElementById("zoneInsideBox");
+      const outsideBox = document.getElementById("zoneOutsideBox");
+
+      insideBox.classList.remove("selected");
+      outsideBox.classList.remove("selected");
+      insideRadio.checked = false;
+      outsideRadio.checked = false;
+
+      if (!district) {
+        currentDeliveryZone = "";
+        currentDeliveryCharge = 0;
+      } else if (district === "Dhaka") {
+        currentDeliveryZone = "ঢাকার ভিতরে";
+        currentDeliveryCharge = INSIDE_DHAKA_CHARGE;
+        insideRadio.checked = true;
+        insideBox.classList.add("selected");
+      } else {
+        currentDeliveryZone = "ঢাকার বাইরে";
+        currentDeliveryCharge = OUTSIDE_DHAKA_CHARGE;
+        outsideRadio.checked = true;
+        outsideBox.classList.add("selected");
+      }
+
+      hideWarning();
+      updateOrderSummary();
+    });
+
+    document.getElementById("custQty").addEventListener("input", updateOrderSummary);
+    document.getElementById("custPhone").addEventListener("input", () => {
+      document.getElementById("custPhone").classList.remove("input-error");
+      hideWarning();
+    });
 
     async function fetchProduct() {
       const dbRef = ref(db);
@@ -307,42 +642,93 @@
       document.getElementById("productTitle").textContent = p.name || "Exclusive Jewellery Collection";
       document.getElementById("productDesc").textContent = p.description || "১০০% প্রিমিয়াম কোয়ালিটি তাজ জুয়েলারি কালেকশন। সারা দেশে হোম ডেলিভারি।";
       document.getElementById("productPrice").textContent = `৳ ${p.price || 218}`;
+      updateOrderSummary();
+
+      // Meta Pixel: ViewContent ইভেন্ট
+      if (typeof fbq === "function") {
+        fbq("track", "ViewContent", {
+          content_ids: [String(p.id || "product")],
+          content_name: p.name || "Exclusive Jewellery Collection",
+          content_type: "product",
+          value: Number(p.price || 218),
+          currency: "BDT"
+        });
+      }
     }
 
     fetchProduct();
 
     const orderModal = document.getElementById("orderModal");
-    document.getElementById("openOrderModal").addEventListener("click", () => orderModal.classList.add("active"));
+    document.getElementById("openOrderModal").addEventListener("click", () => {
+      hideWarning();
+      orderModal.classList.add("active");
+
+      // Meta Pixel: InitiateCheckout ইভেন্ট
+      if (typeof fbq === "function" && activeProduct) {
+        fbq("track", "InitiateCheckout", {
+          content_ids: [String(activeProduct.id || "product")],
+          content_name: activeProduct.name || "Exclusive Jewellery Collection",
+          content_type: "product",
+          value: Number(activeProduct.price || 218),
+          currency: "BDT",
+          num_items: 1
+        });
+      }
+    });
+
     document.getElementById("closeOrderModal").addEventListener("click", () => orderModal.classList.remove("active"));
 
-    // FORM SUBMIT — DIRECT PUSH (MATCHES YOUR RULES EXACTLY)
+    // FORM SUBMIT — ডেটাবেজে সেভ হলেই Purchase ইভেন্ট ফায়ার হবে
     document.getElementById("orderForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      hideWarning();
+
+      const name = document.getElementById("custName").value.trim();
+      const phoneInput = document.getElementById("custPhone");
+      const districtEl = document.getElementById("custDistrict");
+      const district = districtEl.value;
+      const address = document.getElementById("custAddress").value.trim();
+      const qty = Math.max(1, parseInt(document.getElementById("custQty").value) || 1);
+
+      if (!name) {
+        showWarning("সতর্কতা: অনুগ্রহ করে আপনার সম্পূর্ণ নাম লিখুন!", document.getElementById("custName"));
+        return;
+      }
+
+      // ফোন নম্বর ভ্যালিডেশন
+      const phoneCheck = normalizeAndValidatePhone(phoneInput.value);
+      if (!phoneCheck.isValid) {
+        phoneInput.classList.add("input-error");
+        showWarning("সতর্কতা: সঠিক ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর না দিলে অর্ডার কনফার্ম হবে না! (যেমন: 017XXXXXXXX)", phoneInput);
+        return;
+      }
+
+      if (!district) {
+        showWarning("সতর্কতা: অনুগ্রহ করে আপনার জেলা নির্বাচন করুন!", districtEl);
+        return;
+      }
+
+      if (!address) {
+        showWarning("সতর্কতা: অনুগ্রহ করে ডেলিভারির সম্পূর্ণ ঠিকানা লিখুন!", document.getElementById("custAddress"));
+        return;
+      }
+
       const btn = document.getElementById("submitOrderBtn");
       btn.disabled = true;
       btn.textContent = "অর্ডার প্রসেসিং হচ্ছে...";
 
-      const rawPhone = document.getElementById("custPhone").value.trim().replace(/[^0-9]/g, '');
-      
-      // আপনার রুলসের ভ্যালিডেশন: ফোন নম্বর অবশ্যই ১০ থেকে ১৫ অক্ষরের হতে হবে
-      if (rawPhone.length < 10 || rawPhone.length > 15) {
-        alert("দয়া করে সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন!");
-        btn.disabled = false;
-        btn.textContent = "অর্ডার কনফার্ম করুন";
-        return;
-      }
-
-      const qty = parseInt(document.getElementById("custQty").value) || 1;
       const unitPrice = Number(activeProduct?.price || 218);
-      const total = unitPrice * qty;
-      const address = document.getElementById("custAddress").value.trim();
-      const name = document.getElementById("custName").value.trim();
+      const subtotal = unitPrice * qty;
+      const total = subtotal + currentDeliveryCharge;
 
-      // আপনার রুলসে থাকা বাধ্যতামূলক ৪টি ফিল্ড সহ অবজেক্ট
       const orderData = {
         customerName: name,
-        customerPhone: rawPhone,
-        customerAddress: address,
+        customerPhone: phoneCheck.phone,
+        customerAddress: `${address}, জেলা: ${district} (${currentDeliveryZone})`,
+        district: district,
+        deliveryZone: currentDeliveryZone,
+        deliveryCharge: currentDeliveryCharge,
+        subtotal: subtotal,
         totalAmount: total,
         dueAmount: total,
         quantity: qty,
@@ -359,16 +745,31 @@
         const newRef = push(ordersRef);
         await set(newRef, orderData);
 
+        // ডেটাবেজে সঠিকভাবে সেভ হওয়ার পরেই কেবল Meta Pixel Purchase ফায়ার হবে
+        if (typeof fbq === "function") {
+          fbq("track", "Purchase", {
+            content_ids: [String(orderData.productId || "product")],
+            content_name: orderData.productName,
+            content_type: "product",
+            value: Number(orderData.totalAmount),
+            currency: "BDT",
+            num_items: Number(orderData.quantity)
+          }, { eventID: newRef.key });
+        }
+
         orderModal.innerHTML = `
           <div class="modal-box" style="text-align: center;">
             <i class="fas fa-check-circle" style="font-size: 50px; color: #25d366; margin-bottom: 15px;"></i>
             <h2 style="color: #ffd700;">ধন্যবাদ! অর্ডার সফল হয়েছে</h2>
-            <p style="margin: 12px 0 20px; color: #e2e8f0; font-size: 14.5px;">আমাদের প্রতিনিধি কিছুক্ষণের মধ্যেই কল দিয়ে অর্ডার নিশ্চিত করবেন।</p>
+            <p style="margin: 12px 0 8px; color: #e2e8f0; font-size: 14.5px;">
+              মোট বিল: <strong style="color:#ffd700;">৳ ${total}</strong> (${currentDeliveryZone})
+            </p>
+            <p style="margin: 0 0 20px; color: #cbd5e1; font-size: 14px;">আমাদের প্রতিনিধি কিছুক্ষণের মধ্যেই কল দিয়ে অর্ডার নিশ্চিত করবেন।</p>
             <button class="order-btn" onclick="window.location.reload()">ঠিক আছে</button>
           </div>
         `;
       } catch (err) {
-        alert("অর্ডার ত্রুটি: " + err.message);
+        showWarning("অর্ডার ডেটাবেজে সেভ হয়নি: " + err.message);
         btn.disabled = false;
         btn.textContent = "অর্ডার কনফার্ম করুন";
       }
